@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shadow"
+    android:layout_margin="10dp"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:id="@+id/rl_requestitem">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:id="@+id/ll_requestitem">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Race Title"
+            android:textSize="18sp"
+            android:textColor="@color/colorAccent"
+            android:textStyle="bold"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:id="@+id/tv_requesttitle"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Invited by "/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="sophiarivera"
+                android:textColor="@color/colorAccent"
+                android:id="@+id/tv_invitedby"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="Location"
+            android:id="@+id/tv_requestloc"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:text="Date"
+            android:id="@+id/tv_requestdt"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:id="@+id/ll_buttons">
+
+            <Button
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:text="✓"
+                android:textColor="@color/colorPrimary"
+                android:background="@drawable/round_button"
+                android:layout_marginLeft="10dp"
+                android:id="@+id/bt_accept"/>
+
+            <Button
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:text="X"
+                android:textColor="@color/colorPrimary"
+                android:background="@drawable/round_button_red"
+                android:layout_marginLeft="10dp"
+                android:id="@+id/bt_decline"/>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

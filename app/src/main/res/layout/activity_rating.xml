@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:context="ph.edu.dlsu.mobapde.tara.RatingActivity"
+    android:gravity="center"
+    >
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_create"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/shadow"
+        app:layout_scrollFlags="scroll|enterAlways"
+        app:popupTheme="@style/AppTheme.PopupOverlay">
+
+    </android.support.v7.widget.Toolbar>
+
+    <TextView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:gravity="center"
+        android:text="O"
+        android:textSize="20sp"
+        android:textColor="@color/colorPrimary"
+        android:id="@+id/tv_rateinitial"
+        android:background="@drawable/round_button"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_marginTop="20dp"
+            android:id="@+id/rate_me"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rate "
+            android:textSize="18dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="username"
+            android:textSize="18dp"
+            android:textColor="@color/colorAccent"
+            android:textStyle="bold"
+            android:id="@+id/tv_rateusername"/>
+
+    </LinearLayout>
+
+
+    <RatingBar
+        android:layout_below="@+id/rate_me"
+        android:id="@+id/ratingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1.0" />
+
+    <Button
+        android:layout_below="@+id/ratingBar"
+        android:id="@+id/submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Submit"
+        android:textColor="@color/colorPrimary"
+        android:background="@drawable/round_button"
+        android:onClick="rateMe"/>
+
+</LinearLayout>

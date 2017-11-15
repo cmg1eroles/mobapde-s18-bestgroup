@@ -214,7 +214,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
             counterRef.addValueEventListener(new ValueEventListener() {
-            //counterRef.addChildEventListener(new ChildEventListener() {
+                //counterRef.addChildEventListener(new ChildEventListener() {
                 //int ctr = 0;
 
 
@@ -224,11 +224,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     for (DataSnapshot noteSnapshot: dataSnapshot.getChildren()){
                         Tracking note = noteSnapshot.getValue(Tracking.class);
-                       Log.d("ITO", "HASH MAP: " + users);
-                       if (users.containsKey(note.getUid()))
-                           users.get(note.getUid()).getM().remove();
+                        Log.d("ITO", "HASH MAP: " + users);
+                        if (users.containsKey(note.getUid()))
+                            users.get(note.getUid()).getM().remove();
 
-                       users.put(note.getUid(), note);
+                        users.put(note.getUid(), note);
 
                         if(Double.parseDouble(note.getLat()) == notifArea.latitude && Double.parseDouble(note.getLng()) == notifArea.longitude)
                             sendNotification("Tara", String.format("%s is at the finish line", note.getEmail()));
@@ -247,7 +247,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         users.get(key).setM(mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(users.get(key).getLat()), Double.parseDouble(users.get(key).getLng())))
                                 .title(users.get(key).getEmail())
                                 .snippet(users.get(key).getEmail())));
-                            Log.d("ITO", "****************" + users.get(key).getEmail() + " has the M " + users.get(key).getM());
+                        Log.d("ITO", "****************" + users.get(key).getEmail() + " has the M " + users.get(key).getM());
                         //markers.add(m);
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 12.0f));
 

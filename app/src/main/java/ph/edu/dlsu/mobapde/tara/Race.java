@@ -1,6 +1,7 @@
 package ph.edu.dlsu.mobapde.tara;
 
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,31 +12,46 @@ import java.util.HashMap;
  */
 
 public class Race {
-    private long id;
+    private String id;
     private String title;
-    private Place location;
+    //private Place location;
+    private LatLng location;
     private Date date;
 
-    private ArrayList<User> users;
+    private HashMap<String, Boolean> users;
+   // private ArrayList<User> users;
     private boolean inProgress;
 
+    public Race(){
+
+    }
     // for placeholder only
     public Race(String title) {
         this.title = title;
     }
 
-    public Race(String title, Place location, Date date) {
+    public Race(String title, LatLng location, Date date) {
         this.title = title;
         this.location = location;
         this.date = date;
-        users = new ArrayList<User>();
+        //users = new ArrayList<User>();
+        users = new HashMap<>();
     }
 
-    public long getId() {
+
+    public Race(String id, Date date, LatLng location, String title, HashMap<String, Boolean> users){
+        this.id = id;
+        this.date = date;
+        this.location = location;
+        this.title = title;
+        this.users = users;
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -47,11 +63,11 @@ public class Race {
         this.title = title;
     }
 
-    public Place getLocation() {
+    public LatLng getLocation() {
         return location;
     }
 
-    public void setLocation(Place location) {
+    public void setLocation(LatLng location) {
         this.location = location;
     }
 
@@ -63,25 +79,27 @@ public class Race {
         this.date = date;
     }
 
-    public ArrayList<User> getUsers() {
+    public HashMap<String, Boolean> getUsers() {
         return users;
     }
 
-    public void setUsers(ArrayList<User> users) {
+    public void setUsers(HashMap<String, Boolean> users) {
         this.users = users;
     }
 
-    public boolean addUser(User u) {
-        if(u == null)
-            return false;
+    public boolean addUser(String u) {
+        if(u != null){
+            users.put(u, true);
+            return true;
+        }
 
-        return true;
+        return false;
     }
 
     // remove user
 
-    public User getUser(int id) {
-        return users.get(id);
+    public Boolean getUserInRace(int id) {
+        return users.containsKey(id);
     }
 
     public boolean isInProgress() {
@@ -96,7 +114,7 @@ public class Race {
         HashMap<String, Object> result = new HashMap<>();
 
         result.put("title", title);
-        result.put("location", location.getLatLng());
+        result.put("location", getLocation());
         result.put("date", date);
 
         return result;

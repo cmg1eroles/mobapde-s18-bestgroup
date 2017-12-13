@@ -73,4 +73,8 @@ public class AddUsersActivity extends AppCompatActivity {
 
         return true;
     }
+
+    public void addUserToRace(String username) {
+
+    }
 }

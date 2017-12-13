@@ -88,6 +88,11 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupViewPager(ViewPager viewPager) {
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        // CHECK IF USER HAS CURRENT RACE
+        // IF NOT
+        // adapter.addFragment(new NoCurrentFragment(), "CURRENT");
+        // NOT SURE CHECK PA
         adapter.addFragment(new CurrentFragment(), "CURRENT");
         adapter.addFragment(new RequestFragment(), "REQUESTS");
 

@@ -35,7 +35,7 @@ public class AddUserDialog extends DialogFragment {
                         dismiss();
                     }
                 })
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                .setPositiveButton("Add", new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int which)

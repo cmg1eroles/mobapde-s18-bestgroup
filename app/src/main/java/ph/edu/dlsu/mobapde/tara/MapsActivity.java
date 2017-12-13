@@ -43,6 +43,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -65,6 +66,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,11 +94,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //DatabaseReference ref;
 
-    DatabaseReference onlineRef, currentUserRef, counterRef; // from PlayersActivity
+    DatabaseReference onlineRef, currentUserRef, counterRef, racesRef; // from PlayersActivity
     private  static HashMap<String, Tracking> users = new HashMap<>();              //made to get all users
-
-    //GeoFire geofire;
-    Marker myCurrLoc;
 
     VerticalSeekBar mSeekBar;
 
@@ -121,10 +120,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private PendingIntent mGeofencePendingIntent;
 
-    // Buttons for kicking off the process of adding or removing geofences.
-    private Button mAddGeofencesButton;
-    private Button mRemoveGeofencesButton;
-
     private PendingGeofenceTask mPendingGeofenceTask = PendingGeofenceTask.NONE;
 
 
@@ -146,7 +141,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         counterRef = FirebaseDatabase.getInstance().getReference("lastOnline");
         currentUserRef = FirebaseDatabase.getInstance().getReference("lastOnline")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid()); //creates child in lastonline with key uid
-
+        racesRef = FirebaseDatabase.getInstance().getReference("races"); //reference for races
         //geofire = new GeoFire(ref);
 
         mSeekBar = (VerticalSeekBar) findViewById(R.id.verticalSeekBar);
@@ -175,11 +170,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mGeofencePendingIntent = null;
 
         // Get the geofences used. Geofence data is hard coded in this sample.
-        populateGeofenceList();
+        //populateGeofenceList();
 
         mGeofencingClient = LocationServices.getGeofencingClient(this);
 
-        addGeofences(); //+++++++++++++++++++++++++++++++++++++++++
+        //addGeofences(); //+++++++++++++++++++++++++++++++++++++++++
 
         setupLocation();
     }
@@ -251,14 +246,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("ito", "Geofence is added");
-                        /*mMap.addCircle(new CircleOptions()
-                                .center(notifArea)
-                                .radius(500) //THIS IS IN METERS PO
-                                .strokeColor(Color.BLUE)
-                                .fillColor(0x220000FF)
-                                .strokeWidth(5.0f)
-                        );
-                        */
                         // Geofences added
                         // ...
                     }
@@ -315,7 +302,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mPendingGeofenceTask = PendingGeofenceTask.NONE;
         if (task.isSuccessful()) {
             updateGeofencesAdded(!getGeofencesAdded());
-            setButtonsEnabledState();
+            //setButtonsEnabledState();
 
             int messageId = getGeofencesAdded() ? R.string.geofences_added :
                     R.string.geofences_removed;
@@ -345,14 +332,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    /**
-     * This sample hard codes geofence data. A real app might dynamically create geofences based on
-     * the user's location.
-     */
+
+        /**
+         * This sample hard codes geofence data. A real app might dynamically create geofences based on
+         * the user's location.
+         */
     private void populateGeofenceList() {
         Log.d("woo", "populating geofence");
         for (Map.Entry<String, LatLng> entry : Constants.BAY_AREA_LANDMARKS.entrySet()) {
 
+        //for (Map.Entry<String, LatLng> entry : ) {
             mGeofenceList.add(new Geofence.Builder()
                     .setRequestId(entry.getKey())
                     .setCircularRegion(
@@ -367,20 +356,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    /**
-     * Ensures that only one button is enabled at any time. The Add Geofences button is enabled
-     * if the user hasn't yet added geofences. The Remove Geofences button is enabled if the
-     * user has added geofences.
-     */
-    private void setButtonsEnabledState() {
-        if (getGeofencesAdded()) {
-            mAddGeofencesButton.setEnabled(false);
-            mRemoveGeofencesButton.setEnabled(true);
-        } else {
-            mAddGeofencesButton.setEnabled(true);
-            mRemoveGeofencesButton.setEnabled(false);
-        }
+    private void populateGeofenceList(LatLng latlng, String key) {
+        Log.d("ito", "populating geofence");
+           mGeofenceList.add(new Geofence.Builder()
+                    .setRequestId(key)
+                    .setCircularRegion(
+                            latlng.latitude,
+                            latlng.longitude,
+                            Constants.GEOFENCE_RADIUS_IN_METERS
+                    )
+                    .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                            Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .build());
+
+        mMap.addCircle(new CircleOptions()
+                .center(latlng)
+                .radius(500) //THIS IS IN METERS PO
+                .strokeColor(Color.BLUE)
+                .fillColor(0x220000FF)
+                .strokeWidth(5.0f)
+        );
+
     }
+
 
     /**
      * Shows a {@link Snackbar} using {@code text}.
@@ -595,7 +594,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
 
-                @Override
+
+                    @Override
                 public void onCancelled(DatabaseError databaseError) {
 
                 }
@@ -603,6 +603,60 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             //____________________________________________________________________
 
+            racesRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot noteSnapshot: dataSnapshot.getChildren()){
+                        if (noteSnapshot.child("participants").hasChildren()){
+                            String uId = noteSnapshot.getKey();
+                            Date date = noteSnapshot.child("date").getValue(Date.class);
+                            Double lat = noteSnapshot.child("location").child("latitude").getValue(Double.class);
+                            Double lng = noteSnapshot.child("location").child("longitude").getValue(Double.class);
+                            String title = (String) noteSnapshot.child("title").getValue();
+                            HashMap<String, Boolean> ulist = (HashMap<String, Boolean>) noteSnapshot.child("participants").getValue();
+                            //Race race = noteSnapshot.getValue(Race.class);
+                            Log.d("woo", "uId: " + uId + " date: " + date + " lat: " + lat + " lng: " + lng + " title: " + title + " ulist: " + ulist);
+
+                            Race race = new Race(uId, date, new LatLng(lat,lng), title, ulist);
+
+                            if(race.getUsers().containsKey(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                                Log.d("woo", "geofence should be on now since I am participating");
+                                populateGeofenceList(race.getLocation(),race.getTitle());
+                            }
+
+                        }
+                        /*
+                        String uId = noteSnapshot.getKey();
+                        Date date = noteSnapshot.child("date").getValue(Date.class);
+                        Double lat = noteSnapshot.child("location").child("latitude").getValue(Double.class);
+                        Double lng = noteSnapshot.child("location").child("longitude").getValue(Double.class);
+                        String title = (String) noteSnapshot.child("title").getValue();
+                        HashMap<String, Boolean> ulist = (HashMap<String, Boolean>) noteSnapshot.child("participants").getValue();
+                        //Race race = noteSnapshot.getValue(Race.class);
+                        Log.d("woo", "uId: " + uId + " date: " + date + " lat: " + lat + " lng: " + lng + " title: " + title + " ulist: " + ulist);
+
+                        Race race = new Race(uId, date, new LatLng(lat,lng), title, ulist);
+
+                        if(race.getUsers().containsKey(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+
+                            populateGeofenceList(race.getLocation(),race.getTitle());
+                        }
+                        */
+
+                        /*
+                        ArrayList<User> ulist = race.getUsers();
+
+                        for (int i = 0; i<ulist.size(); i++)
+                            if(ulist.get(i).getId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()))
+                        */
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
 
             counterRef.addValueEventListener(new ValueEventListener() {
             //counterRef.addChildEventListener(new ChildEventListener() {

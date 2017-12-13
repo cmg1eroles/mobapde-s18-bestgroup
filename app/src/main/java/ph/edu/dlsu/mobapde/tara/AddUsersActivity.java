@@ -61,6 +61,8 @@ public class AddUsersActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // ADDING USERS
+                AddUserDialog aud = new AddUserDialog();
+                aud.show(getFragmentManager(), "");
             }
         });
     }

@@ -53,23 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
         tvChangeUN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getBaseContext());
 
-                final EditText et = new EditText(getBaseContext());
-
-                // set prompts.xml to alertdialog builder
-                alertDialogBuilder.setView(et);
-
-                // set dialog message
-                alertDialogBuilder.setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                });
-
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                // show it
-                alertDialog.show();
             }
         });
 
@@ -99,5 +83,13 @@ public class SettingsActivity extends AppCompatActivity {
         startActivity(i);
 
         return true;
+    }
+
+    public void changeUsername(String newUsername) {
+
+    }
+
+    public void changePassword(String oldPassword, String newPassword, String confirmPassword) {
+
     }
 }

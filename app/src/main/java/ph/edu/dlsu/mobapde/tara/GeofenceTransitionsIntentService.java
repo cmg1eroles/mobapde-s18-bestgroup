@@ -32,8 +32,15 @@ import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -46,6 +53,11 @@ import java.util.List;
 @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
 public class GeofenceTransitionsIntentService extends IntentService {
 
+    DatabaseReference racesRef;
+    long timestamp;
+    long deadline;
+    String deadlineID;
+    long numOnTime, numEarly, numLate;
     private static final String TAG = "GeofenceTransitionsIS";
 
     /**
@@ -167,6 +179,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
         mNotificationManager.notify(0, builder.build());
     }
 
+    /*
+    public int getPoints(){
+
+        return (deadline - timestamp)/(timestamp + deadline) *
+    }
+    */
+
     /**
      * Maps geofence transition types to their human-readable equivalents.
      *
@@ -174,9 +193,63 @@ public class GeofenceTransitionsIntentService extends IntentService {
      * @return                  A String indicating the type of transition
      */
     private String getTransitionString(int transitionType) {
+        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userID);
+
+
+
+
+        userRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                deadlineID = (String) dataSnapshot.child("currentRace").getValue();
+                racesRef = FirebaseDatabase.getInstance().getReference("races").child(deadlineID).child("date");
+                numEarly = (long) dataSnapshot.child("numEarly").getValue();
+                numLate = (long) dataSnapshot.child("numLate").getValue();
+                numOnTime = (long) dataSnapshot.child("numOnTime").getValue();
+
+                racesRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        deadline = (long) dataSnapshot.child("time").getValue();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+        // Intent intent = new Intent(getBaseContext(), ArrivedDialog.class);
+
+
         switch (transitionType) {
             case Geofence.GEOFENCE_TRANSITION_ENTER:
-                return getString(R.string.geofence_transition_entered);
+
+
+                timestamp = System.currentTimeMillis();
+                if (timestamp == deadline){
+                    numOnTime++;
+                    userRef.child("numOnTime").setValue(numOnTime);
+                    return "Arrived ON TIME";
+                }else if (timestamp < deadline){
+                    numEarly++;
+                    userRef.child("numEarly").setValue(numEarly);
+                    return "Arrived EARLY";
+                }
+                    numLate++;
+                    userRef.child("numLate").setValue(numLate);
+                    return "Arrived LATE";
+
             case Geofence.GEOFENCE_TRANSITION_EXIT:
                 return getString(R.string.geofence_transition_exited);
             default:

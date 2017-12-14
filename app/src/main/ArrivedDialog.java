@@ -13,37 +13,27 @@ import android.widget.EditText;
  * Created by louis on 12/13/2017.
  */
 
-public class ChangeUsernameDialog extends DialogFragment {
+public class ArrivedDialog extends DialogFragment {
     View v;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
         v = LayoutInflater.from(getActivity())
-                .inflate(R.layout.dialog_changeusername, null);
+                .inflate(R.layout.dialog_changepassword, null);
 
         AlertDialog.Builder dialogBuilder
                 = new AlertDialog.Builder(getActivity())
-                .setTitle("Change Username")
+                .setTitle("You have arrived!")
                 .setView(v)
-                .setNeutralButton("Cancel", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        dismiss();
-                    }
-                })
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener()
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
                         dismiss();
 
-                        EditText etUsername = (EditText) v.findViewById(R.id.et_changeusername);
-
-                        ((SettingsActivity) getActivity()).changeUsername(etUsername.getText().toString());
+                        
                     }
                 });
 

@@ -24,8 +24,7 @@ public class AddUserDialog extends DialogFragment {
 
         AlertDialog.Builder dialogBuilder
                 = new AlertDialog.Builder(getActivity())
-                .setTitle("Add")
-                .setMessage("Enter username of person you want to add")
+                .setTitle("Add User to Race")
                 .setView(v)
                 .setNeutralButton("Cancel", new DialogInterface.OnClickListener()
                 {

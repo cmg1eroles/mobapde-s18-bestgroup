@@ -40,6 +40,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -57,10 +58,12 @@ import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
 
 // import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.TimeZone;
 
 import static android.graphics.Color.argb;
 
@@ -396,6 +399,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .strokeWidth(5.0f)
         );
 
+        addGeofences();
     }
 
 
@@ -626,21 +630,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot noteSnapshot: dataSnapshot.getChildren()){
                         if (noteSnapshot.child("participants").hasChildren()){
-                            String uId = noteSnapshot.getKey();
-                            Date date = noteSnapshot.child("date").getValue(Date.class);
-                            Double lat = noteSnapshot.child("location").child("latitude").getValue(Double.class);
-                            Double lng = noteSnapshot.child("location").child("longitude").getValue(Double.class);
-                            String title = (String) noteSnapshot.child("title").getValue();
                             HashMap<String, Boolean> ulist = (HashMap<String, Boolean>) noteSnapshot.child("participants").getValue();
-                            //Race race = noteSnapshot.getValue(Race.class);
-                            Log.d("woo", "uId: " + uId + " date: " + date + " lat: " + lat + " lng: " + lng + " title: " + title + " ulist: " + ulist);
+                            if (ulist.containsKey(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                                Date date = noteSnapshot.child("date").getValue(Date.class);
+                                Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
+                                Log.d("woo", "DATE OF RACE: " + date );
+                                String dateOfRace = (date.getYear()+1900) + "/" + (date.getMonth()) + "/" + date.getDate();
+                                String dateToday = calendar.get(Calendar.YEAR) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.DAY_OF_MONTH);
+                                Log.d("woo", dateOfRace + " AND " + dateToday);
+                                    if ( dateOfRace.equals(dateToday)){
+                                        String uId = noteSnapshot.getKey();
+                                        //Date date = noteSnapshot.child("date").getValue(Date.class);
+                                        Double lat = noteSnapshot.child("location").child("latitude").getValue(Double.class);
+                                        Double lng = noteSnapshot.child("location").child("longitude").getValue(Double.class);
+                                        String title = (String) noteSnapshot.child("title").getValue();
 
-                            Race race = new Race(uId, date, new LatLng(lat,lng), title, ulist);
+                                        //Race race = noteSnapshot.getValue(Race.class);
+                                        Log.d("woo", "uId: " + uId + " date: " + date + " lat: " + lat + " lng: " + lng + " title: " + title + " ulist: " + ulist);
 
-                            if(race.getUsers().containsKey(FirebaseAuth.getInstance().getCurrentUser().getUid())){
-                                Log.d("woo", "geofence should be on now since I am participating");
-                                Log.d("woo", "RACE PASSED: " + race.getDate());
-                                populateGeofenceList(race.getLocation(),race.getTitle(), race.getDate());
+                                        Race race = new Race(uId, date, new LatLng(lat,lng), title, ulist);
+
+                                        //if(race.getUsers().containsKey(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                                            Log.d("woo", "geofence should be on now since I am participating");
+                                            Log.d("woo", "RACE PASSED: " + race.getDate());
+                                            populateGeofenceList(race.getLocation(),race.getTitle(), race.getDate());
+                                        //}
+
+                                    }
+
                             }
 
                         }
@@ -685,9 +702,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Log.d("ITO", "@@@@@@@@@@@@@@" + users.get(key).getEmail() + " changed position!");
                             users.get(key).getM().remove(); //removes the outdated marker
                         }
-                        users.get(key).setM(mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(users.get(key).getLat()), Double.parseDouble(users.get(key).getLng())))
-                                .title(users.get(key).getEmail())
-                                .snippet(users.get(key).getEmail())));
+                        Log.d("ITO", "My key is: " + FirebaseAuth.getInstance().getCurrentUser().getUid() + "    user.get(key): " + users.get(key));
+                        if (key.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                            users.get(key).setM(mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(users.get(key).getLat()), Double.parseDouble(users.get(key).getLng())))
+                                    .title(users.get(key).getEmail())
+                                    .snippet(users.get(key).getEmail())));
+
+                        }else{
+                            users.get(key).setM(mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(users.get(key).getLat()), Double.parseDouble(users.get(key).getLng())))
+                                    .title(users.get(key).getEmail())
+                                    .snippet(users.get(key).getEmail())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))));
+                        }
+
                             Log.d("ITO", "****************" + users.get(key).getEmail() + " has the M " + users.get(key).getM());
                         //markers.add(m);
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 12.0f));

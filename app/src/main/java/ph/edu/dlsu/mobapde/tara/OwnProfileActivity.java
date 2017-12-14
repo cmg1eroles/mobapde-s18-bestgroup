@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -15,7 +16,7 @@ import org.w3c.dom.Text;
 
 public class OwnProfileActivity extends AppCompatActivity {
 
-    ImageButton ibSettings;
+    ImageView ivSettings;
 
     TextView tvInitial;
     TextView tvUsername;
@@ -39,7 +40,7 @@ public class OwnProfileActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        ibSettings = (ImageButton) findViewById(R.id.ib_profsettings);
+        ivSettings = (ImageView) findViewById(R.id.iv_profsettings);
 
         tvInitial = (TextView) findViewById(R.id.tv_ownprofileinitial);
         tvUsername = (TextView) findViewById(R.id.tv_profname);
@@ -50,10 +51,9 @@ public class OwnProfileActivity extends AppCompatActivity {
         tvNumCancelled = (TextView) findViewById(R.id.tv_prnumCancelled);
         rbUserRating = (RatingBar) findViewById(R.id.ratingBar);
 
-        ibSettings.setOnClickListener(new View.OnClickListener() {
+        ivSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // go to main activity
                 Intent i = new Intent(OwnProfileActivity.this, SettingsActivity.class);
                 startActivity(i);
             }

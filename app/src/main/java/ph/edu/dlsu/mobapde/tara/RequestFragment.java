@@ -1,16 +1,30 @@
 package ph.edu.dlsu.mobapde.tara;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by louis on 11/13/2017.
@@ -18,17 +32,30 @@ import java.util.ArrayList;
 
 public class RequestFragment extends Fragment {
 
+    TextView tvNoRequests;
     RecyclerView rvRequests;
+    DatabaseReference ref;
 
-    // Placeholders
+    HashMap<String, Integer> rIndices;
+
     ArrayList<Request> requests;
+    RequestAdapterSkeleton ra;
+    FirebaseAuth mAuth;
+    FirebaseUser currUser;
+    //FirebaseRecyclerAdapter<Request, RequestViewHolder> requestFirebaseRecyclerAdapter;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        final String currUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        final DatabaseReference requestDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID).child("requests");
+
+        tvNoRequests = (TextView) view.findViewById(R.id.tv_norequests);
         rvRequests = (RecyclerView) view.findViewById(R.id.rv_requests);
         requests = new ArrayList<Request>();
+        mAuth = FirebaseAuth.getInstance();
+        currUser = mAuth.getCurrentUser();
 
         User user1 = new User("louise_cortez@gmail.com", "louiseeee", "hello1234");
         User user2 = new User("what@gmail.com", "username2", "hello1234");
@@ -40,10 +67,43 @@ public class RequestFragment extends Fragment {
         requests.add(new Request(user1, user2, race2, false));
         requests.add(new Request(user1, user2, race3, false));
 
-        RequestAdapterSkeleton ra = new RequestAdapterSkeleton(requests);
-
+        ra = new RequestAdapterSkeleton(requests);
         rvRequests.setAdapter(ra);
         rvRequests.setLayoutManager(new LinearLayoutManager(getActivity().getBaseContext(), LinearLayoutManager.VERTICAL, false));
+
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            final DatabaseReference currRequestDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID);
+
+            currRequestDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.hasChild("requests")) {
+                        tvNoRequests.setVisibility(LinearLayout.INVISIBLE);
+                        currRequestDatabaseRef.child("requests").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+//                                    Request request = snapshot.getValue(Request.class);
+//
+//                                    rIndices.put(dataSnapshot.getKey(), requests.size());
+//                                    requests.add(request);
+//                                    ra.setUserRequests(requests);
+                                }
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {}
+                        });
+                    } else {
+                        tvNoRequests.setVisibility(LinearLayout.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     @Nullable
@@ -52,5 +112,9 @@ public class RequestFragment extends Fragment {
         View view = inflater.inflate(R.layout.requests_fragment, container, false);
 
         return view;
+    }
+
+    public void addRequest(String userKey) {
+
     }
 }

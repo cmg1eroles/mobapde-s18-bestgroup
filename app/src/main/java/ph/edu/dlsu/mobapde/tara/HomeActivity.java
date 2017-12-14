@@ -99,8 +99,6 @@ public class HomeActivity extends AppCompatActivity {
             final String currUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
             final DatabaseReference currRaceDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID);
 
-            // CHECK IF USER HAS CURRENT RACE
-            // NOT SURE CHECK PA
             currRaceDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {

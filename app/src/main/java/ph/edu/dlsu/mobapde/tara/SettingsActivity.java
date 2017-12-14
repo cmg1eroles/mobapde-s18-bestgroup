@@ -15,8 +15,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,6 +38,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     FirebaseAuth mAuth;
     DatabaseReference db;
+    FirebaseUser fbu = FirebaseAuth.getInstance().getCurrentUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +61,16 @@ public class SettingsActivity extends AppCompatActivity {
         tvChangeUN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ChangeUsernameDialog cud = new ChangeUsernameDialog();
+                cud.show(getFragmentManager(), "");
+            }
+        });
 
+        tvChangePW.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ChangePasswordDialog cpd = new ChangePasswordDialog();
+                cpd.show(getFragmentManager(), "");
             }
         });
 
@@ -86,10 +103,39 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public void changeUsername(String newUsername) {
-
+        // need pa ba username since email nalang naman
     }
 
-    public void changePassword(String oldPassword, String newPassword, String confirmPassword) {
+    public void changePassword(String oldPassword, final String newPassword, String confirmPassword) {
+        if(newPassword.equals(confirmPassword)) {
+            AuthCredential ac = EmailAuthProvider.getCredential(fbu.getEmail(), oldPassword);
 
+            fbu.reauthenticate(ac)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                fbu.updatePassword(newPassword).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Toast t = Toast.makeText(getBaseContext(), "Successfully updated password", Toast.LENGTH_LONG);
+                                            t.show();
+                                        } else {
+                                            Toast t = Toast.makeText(getBaseContext(), "Error updating password", Toast.LENGTH_LONG);
+                                            t.show();
+                                        }
+                                    }
+                                });
+                            } else {
+                                Toast t = Toast.makeText(getBaseContext(), "Authentication failed", Toast.LENGTH_LONG);
+                                t.show();
+                            }
+                        }
+                    });
+        } else {
+            Toast t = Toast.makeText(getBaseContext(), "Passwords do not match", Toast.LENGTH_LONG);
+            t.show();
+        }
     }
 }

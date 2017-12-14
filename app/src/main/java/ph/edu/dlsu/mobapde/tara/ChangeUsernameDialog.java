@@ -24,8 +24,7 @@ public class ChangeUsernameDialog extends DialogFragment {
 
         AlertDialog.Builder dialogBuilder
                 = new AlertDialog.Builder(getActivity())
-                .setTitle("Add")
-                .setMessage("Change Username")
+                .setTitle("Change Username")
                 .setView(v)
                 .setNeutralButton("Cancel", new DialogInterface.OnClickListener()
                 {

@@ -24,8 +24,7 @@ public class ChangePasswordDialog extends DialogFragment {
 
         AlertDialog.Builder dialogBuilder
                 = new AlertDialog.Builder(getActivity())
-                .setTitle("Add")
-                .setMessage("Change Password")
+                .setTitle("Change Password")
                 .setView(v)
                 .setNeutralButton("Cancel", new DialogInterface.OnClickListener()
                 {

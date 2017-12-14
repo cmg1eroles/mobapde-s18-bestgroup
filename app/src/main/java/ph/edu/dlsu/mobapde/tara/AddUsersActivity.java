@@ -11,8 +11,10 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,7 +36,7 @@ public class AddUsersActivity extends AppCompatActivity {
 
     DatabaseReference ref;
     FirebaseAuth mAuth;
-    String currUser;
+    FirebaseUser currUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +51,8 @@ public class AddUsersActivity extends AppCompatActivity {
 
         ref = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
-        currUser = mAuth.getCurrentUser().getUid();
+        currUser = mAuth.getCurrentUser();
+
 
         rvCurrentParticipants = (RecyclerView) findViewById(R.id.rv_participants);
         buttonAdd = (Button) findViewById(R.id.bt_addUsers);
@@ -86,7 +89,7 @@ public class AddUsersActivity extends AppCompatActivity {
             }
         });
 
-        ref.child("users").child(currUser).child("currentRace").addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.child("users").child(currUser.getUid()).child("currentRace").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 raceID = dataSnapshot.getValue(String.class)+"";
@@ -110,19 +113,22 @@ public class AddUsersActivity extends AppCompatActivity {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                receiverID = dataSnapshot.getChildren().iterator().next().getKey()+"";
+                if (dataSnapshot.getChildren().iterator().hasNext()) {
+                    receiverID = dataSnapshot.getChildren().iterator().next().getKey() + "";
 
-                HashMap<String, String> request = new HashMap<>();
-                request.put("race_id", raceID);
-                request.put("sender_id", currUser);
+                    HashMap<String, String> request = new HashMap<>();
+                    request.put("race_id", raceID);
+                    request.put("sender", currUser.getEmail());
 
-                Log.i("request_data", "race: " + raceID + "\n" +
-                        "sender: " + currUser + "\n" +
-                        "receiver: " + receiverID);
+                    String key = ref.child("users").child(receiverID).child("requests").push().getKey();
 
-                String key = ref.child("users").child(receiverID).child("requests").push().getKey();
+                    ref.child("users").child(receiverID).child("requests").child(key).setValue(request);
+                    ref.child("races").child(raceID).child("participants").child(receiverID).setValue(false);
 
-                ref.child("users").child(receiverID).child("requests").child(key).setValue(request);
+                    Toast.makeText(getBaseContext(), "User successfully added to the race!", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "User with this email does not exist!", Toast.LENGTH_LONG).show();
+                }
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {}

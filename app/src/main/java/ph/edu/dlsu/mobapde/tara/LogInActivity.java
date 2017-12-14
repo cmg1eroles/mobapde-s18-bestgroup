@@ -36,6 +36,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     Button btlogin;
     EditText etemail;
     EditText etpassword;
+    TextView tvForgotPw;
 
     ProgressBar progressbar;
 
@@ -53,6 +54,9 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        tvForgotPw = (TextView) findViewById(R.id.tv_forgotpw);
+        etemail = (EditText) findViewById(R.id.et_email);
+
         tvsignup = (TextView) findViewById(R.id.tv_signup);
         tvsignup.setOnClickListener(this);
 
@@ -66,6 +70,18 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance().getReference();
+
+        tvForgotPw.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(etemail.getText().toString().length() > 0) {
+                    resetPassword(etemail.getText().toString());
+                } else {
+                    Toast t = Toast.makeText(getBaseContext(), "No email specified", Toast.LENGTH_LONG);
+                    t.show();
+                }
+            }
+        });
     }
 
 
@@ -127,6 +143,25 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
+    public boolean resetPassword(String email) {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+
+        auth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast t = Toast.makeText(getBaseContext(), "Password reset email sent", Toast.LENGTH_LONG);
+                            t.show();
+                        } else {
+                            Toast t = Toast.makeText(getBaseContext(), "Error authenticating email", Toast.LENGTH_LONG);
+                            t.show();
+                        }
+                    }
+                });
+
+        return true;
+    }
 
     @Override
     public void onClick(View v) {

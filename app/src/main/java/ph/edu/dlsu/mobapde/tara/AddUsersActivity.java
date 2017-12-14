@@ -88,6 +88,7 @@ public class AddUsersActivity extends AppCompatActivity {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 User u = dataSnapshot.getValue(User.class);
+                                u.setId(dataSnapshot.getKey());
                                 Log.i("Added User", u.toString());
                                 pIndices.put(dataSnapshot.getKey(), participants.size());
                                 Log.i(dataSnapshot.getKey(), Integer.toString(participants.size()));
@@ -133,6 +134,7 @@ public class AddUsersActivity extends AppCompatActivity {
             @Override
             public void onItemClick(User u) {
                 Intent i = new Intent(AddUsersActivity.this, ProfileActivity.class);
+                i.putExtra("user_id", u.getId());
                 startActivity(i);
             }
         });

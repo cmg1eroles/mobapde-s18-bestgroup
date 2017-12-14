@@ -10,7 +10,7 @@ public class User {
     private String email;
     private String username;
     private String password;
-
+    private int points;
     private int numEarly;
     private int numOnTime;
     private int numLate;
@@ -72,6 +72,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
     }
 
     public int getNumEarly() {
@@ -153,13 +161,14 @@ public class User {
                 ", email='" + email + '\'' +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
+                ", points=" + points +
                 ", numEarly=" + numEarly +
                 ", numOnTime=" + numOnTime +
                 ", numLate=" + numLate +
                 ", numCancelled=" + numCancelled +
                 ", status='" + status + '\'' +
                 ", listPosition=" + listPosition +
-                ", currentRace=" + currentRace +
+                ", currentRace='" + currentRace + '\'' +
                 '}';
     }
 }

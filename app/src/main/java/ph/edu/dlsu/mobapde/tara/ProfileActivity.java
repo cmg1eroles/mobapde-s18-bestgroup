@@ -15,6 +15,12 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 public class ProfileActivity extends AppCompatActivity {
 
     TextView tvInitial;
@@ -28,6 +34,9 @@ public class ProfileActivity extends AppCompatActivity {
     RatingBar rbUserRating;
     LinearLayout llClickable;
 
+    String userID;
+    DatabaseReference ref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,22 +48,34 @@ public class ProfileActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        ref = FirebaseDatabase.getInstance().getReference();
+
+        Intent i = getIntent();
+        userID = i.getStringExtra("user_id");
+
         tvInitial = (TextView) findViewById(R.id.tv_profileinitial);
         tvUsername = (TextView) findViewById(R.id.tv_profnameother);
-        tvPoints = (TextView) findViewById(R.id.tv_earlypoints);
+        tvPoints = (TextView) findViewById(R.id.tv_points);
         tvNumEarly = (TextView) findViewById(R.id.tv_numEarly);
         tvNumOnTime = (TextView) findViewById(R.id.tv_numOnTime);
         tvNumLate = (TextView) findViewById(R.id.tv_numLate);
         tvNumCancelled = (TextView) findViewById(R.id.tv_numCancelled);
-        rbUserRating = (RatingBar) findViewById(R.id.ratingBarother);
         llClickable = (LinearLayout) findViewById(R.id.ll_clickablerate);
 
-        llClickable.setOnClickListener(new View.OnClickListener() {
+        ref.child("users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                Intent i = new Intent(ProfileActivity.this, RatingActivity.class);
-                startActivity(i);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User u = dataSnapshot.getValue(User.class);
+                tvInitial.setText((u.getEmail().charAt(0)+"").toUpperCase());
+                tvUsername.setText(u.getEmail());
+                tvPoints.setText("Points: " + u.getPoints());
+                tvNumEarly.setText(u.getNumEarly()+"");
+                tvNumOnTime.setText(u.getNumOnTime()+"");
+                tvNumLate.setText(u.getNumLate()+"");
+                tvNumCancelled.setText(u.getNumCancelled()+"");
             }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
         });
     }
 

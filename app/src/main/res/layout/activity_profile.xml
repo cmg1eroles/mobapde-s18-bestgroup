@@ -53,18 +53,13 @@
                 android:textSize="20sp"
                 android:textStyle="bold"/>
 
-            <RatingBar
-                android:layout_below="@+id/rate_me"
-                android:id="@+id/ratingBarother"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/tv_points"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:numStars="5"
-                android:stepSize="1.0"
-                style="?android:attr/ratingBarStyleIndicator"
-                android:transformPivotX="0dp"
-                android:transformPivotY="0dp"
-                android:isIndicator="true"
-                android:max="5"/>
+                android:textStyle="bold"
+                android:textColor="@color/colorAccent"
+                android:text="Points: -"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -110,7 +105,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="13"
+                android:text="-"
                 android:textColor="@color/colorPrimaryDark"
                 android:id="@+id/tv_numEarly"/>
         </LinearLayout>
@@ -131,7 +126,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="21"
+                android:text="-"
                 android:textColor="@color/colorPrimaryDark"
                 android:id="@+id/tv_numOnTime"/>
         </LinearLayout>
@@ -152,7 +147,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="6"
+                android:text="-"
                 android:textColor="@color/colorPrimaryDark"
                 android:id="@+id/tv_numLate"/>
         </LinearLayout>
@@ -173,7 +168,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="10"
+                android:text="-"
                 android:textColor="@color/colorPrimaryDark"
                 android:id="@+id/tv_numCancelled"/>
         </LinearLayout>

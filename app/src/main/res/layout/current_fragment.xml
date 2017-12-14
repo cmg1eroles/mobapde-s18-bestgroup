@@ -71,7 +71,7 @@
             android:layout_marginRight="35dp"
             android:textColor="@color/colorAccent"
             android:textSize="15sp"
-            android:text="4 Participants"
+            android:text="# Participants"
             android:layout_gravity="center"
             android:id="@+id/tv_numUsers"/>
     </LinearLayout>

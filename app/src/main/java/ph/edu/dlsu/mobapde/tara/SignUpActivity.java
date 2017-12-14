@@ -134,6 +134,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                             u.setNumEarly(0);
                             u.setNumLate(0);
                             u.setNumOnTime(0);
+                            u.setPoints(0);
 
                             db.child("users").child(fu.getUid()).setValue(u);
 

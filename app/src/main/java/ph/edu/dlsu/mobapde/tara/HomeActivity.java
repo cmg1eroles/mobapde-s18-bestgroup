@@ -17,6 +17,11 @@ import android.view.View;
 import android.widget.Button;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +39,7 @@ public class HomeActivity extends AppCompatActivity {
     FloatingActionButton fab_addRace;
     Button buttonUser;
     FirebaseAuth mAuth;
+    SectionsPagerAdapter adapter;
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -87,14 +93,34 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        adapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // CHECK IF USER HAS CURRENT RACE
-        // IF NOT
-        // adapter.addFragment(new NoCurrentFragment(), "CURRENT");
-        // NOT SURE CHECK PA
-        adapter.addFragment(new CurrentFragment(), "CURRENT");
-        adapter.addFragment(new RequestFragment(), "REQUESTS");
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            final String currUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            final DatabaseReference currRaceDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID);
+
+            // CHECK IF USER HAS CURRENT RACE
+            // NOT SURE CHECK PA
+            currRaceDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.hasChild("currentRace")) {
+                        adapter.addFragment(new CurrentFragment(), "CURRENT");
+                        adapter.addFragment(new RequestFragment(), "REQUESTS");
+                    } else {
+                        adapter.addFragment(new NoCurrentFragment(), "CURRENT");
+                        adapter.addFragment(new RequestFragment(), "REQUESTS");
+                    }
+
+                    adapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
 
         viewPager.setAdapter(adapter);
     }

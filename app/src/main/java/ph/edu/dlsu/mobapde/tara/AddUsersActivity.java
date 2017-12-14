@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,6 +32,9 @@ public class AddUsersActivity extends AppCompatActivity {
     RecyclerView rvCurrentParticipants;
     Button buttonAdd;
     ArrayList<User> participants;
+    HashMap<String, Integer> pIndices;
+
+    UserRaceAdapterSkeleton ua;
 
     String raceID, receiverID;
 
@@ -57,28 +61,11 @@ public class AddUsersActivity extends AppCompatActivity {
         rvCurrentParticipants = (RecyclerView) findViewById(R.id.rv_participants);
         buttonAdd = (Button) findViewById(R.id.bt_addUsers);
         participants = new ArrayList<User>();
+        pIndices = new HashMap<String, Integer>();
 
-        User user1 = new User("louise_cortez@gmail.com", "louise", "hello1234");
-        User user2 = new User("carlo_eroles@gmail.com", "carlo", "hello1234");
-        User user3 = new User("sophia_rivera@gmail.com", "sophia", "hello1234");
-        User user4 = new User("mscourtney@gmail.com", "mscourtney", "hello1234");
-
-        participants.add(user1);
-        participants.add(user2);
-        participants.add(user3);
-        participants.add(user4);
-
-        UserRaceAdapterSkeleton ua = new UserRaceAdapterSkeleton(participants);
+        ua = new UserRaceAdapterSkeleton(participants);
         rvCurrentParticipants.setAdapter(ua);
         rvCurrentParticipants.setLayoutManager(new LinearLayoutManager(getBaseContext(), LinearLayoutManager.VERTICAL, false));
-
-        ua.setOnItemClickListener(new UserRaceAdapterSkeleton.OnItemClickListener() {
-            @Override
-            public void onItemClick(User u) {
-                Intent i = new Intent(AddUsersActivity.this, ProfileActivity.class);
-                startActivity(i);
-            }
-        });
 
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,9 +80,61 @@ public class AddUsersActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 raceID = dataSnapshot.getValue(String.class)+"";
+
+                ref.child("races").child(raceID).child("participants").addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        ref.child("users").child(dataSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                User u = dataSnapshot.getValue(User.class);
+                                Log.i("Added User", u.toString());
+                                pIndices.put(dataSnapshot.getKey(), participants.size());
+                                Log.i(dataSnapshot.getKey(), Integer.toString(participants.size()));
+                                participants.add(u);
+                                ua.setUsersInRace(participants);
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {}
+                        });
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        ref.child("users").child(dataSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                int ind = pIndices.get(dataSnapshot.getKey());
+                                User u = participants.remove(ind);
+
+                                ua.setUsersInRace(participants);
+                                Log.i("Removed User", u.toString());
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {}
+                        });
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {}
+                });
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {}
+        });
+
+        ua.setOnItemClickListener(new UserRaceAdapterSkeleton.OnItemClickListener() {
+            @Override
+            public void onItemClick(User u) {
+                Intent i = new Intent(AddUsersActivity.this, ProfileActivity.class);
+                startActivity(i);
+            }
         });
     }
 

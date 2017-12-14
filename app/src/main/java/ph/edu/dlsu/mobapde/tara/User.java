@@ -19,7 +19,7 @@ public class User {
     private String status;
     private int listPosition;
 
-    private Race currentRace;
+    private String currentRace;
 
     public User() {}
 
@@ -114,11 +114,11 @@ public class User {
         this.status = status;
     }
 
-    public Race getCurrentRace() {
+    public String getCurrentRace() {
         return currentRace;
     }
 
-    public void setCurrentRace(Race currentRace) {
+    public void setCurrentRace(String currentRace) {
         this.currentRace = currentRace;
     }
 
@@ -144,5 +144,22 @@ public class User {
 
     public void setListPosition(int listPosition) {
         this.listPosition = listPosition;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", numEarly=" + numEarly +
+                ", numOnTime=" + numOnTime +
+                ", numLate=" + numLate +
+                ", numCancelled=" + numCancelled +
+                ", status='" + status + '\'' +
+                ", listPosition=" + listPosition +
+                ", currentRace=" + currentRace +
+                '}';
     }
 }

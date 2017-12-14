@@ -12,6 +12,7 @@ import android.widget.TextView;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by louis on 11/14/2017.
@@ -32,9 +33,6 @@ public class UserRaceAdapterSkeleton extends RecyclerView.Adapter<UserRaceAdapte
 
     @Override
     public UserRaceViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // TODO inflate view
-        // TODO return a WeatherViewHolder
-
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_item, parent, false);
         return new UserRaceViewHolder(v);
     }
@@ -45,8 +43,8 @@ public class UserRaceAdapterSkeleton extends RecyclerView.Adapter<UserRaceAdapte
         usersInRace.get(position).setListPosition(position);
         User currentUser = usersInRace.get(position);
 
-        holder.tvUsername.setText(currentUser.getUsername());
-        holder.tvUserInitial.setText(currentUser.getUsername().charAt(0) + "");
+        holder.tvUsername.setText(currentUser.getEmail());
+        holder.tvUserInitial.setText(currentUser.getEmail().charAt(0) + "");
         holder.itemView.setTag(currentUser);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {

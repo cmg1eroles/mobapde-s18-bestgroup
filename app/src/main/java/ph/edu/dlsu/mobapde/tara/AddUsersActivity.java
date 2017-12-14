@@ -7,18 +7,34 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AddUsersActivity extends AppCompatActivity {
 
     RecyclerView rvCurrentParticipants;
     Button buttonAdd;
     ArrayList<User> participants;
+
+    String raceID, receiverID;
+
+    DatabaseReference ref;
+    FirebaseAuth mAuth;
+    String currUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +46,10 @@ public class AddUsersActivity extends AppCompatActivity {
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+
+        ref = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+        currUser = mAuth.getCurrentUser().getUid();
 
         rvCurrentParticipants = (RecyclerView) findViewById(R.id.rv_participants);
         buttonAdd = (Button) findViewById(R.id.bt_addUsers);
@@ -65,6 +85,16 @@ public class AddUsersActivity extends AppCompatActivity {
                 aud.show(getFragmentManager(), "");
             }
         });
+
+        ref.child("users").child(currUser).child("currentRace").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //ids[0] = dataSnapshot.getValue(String.class);
+                raceID = dataSnapshot.getValue(String.class)+"";
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
     }
 
     // ADDED TOOLBAR BACK OPTIONS
@@ -77,6 +107,27 @@ public class AddUsersActivity extends AppCompatActivity {
     }
 
     public void addUserToRace(String username) {
+        Query query = ref.child("users").orderByChild("email").equalTo(username);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                receiverID = dataSnapshot.getChildren().iterator().next().getKey()+"";
 
+                HashMap<String, String> request = new HashMap<>();
+                request.put("race_id", raceID);
+                request.put("sender_id", currUser);
+                request.put("receiver_id", receiverID);
+
+                Log.i("request_data", "race: " + raceID + "\n" +
+                        "sender: " + currUser + "\n" +
+                        "receiver: " + receiverID);
+
+                String key = ref.child("requests").push().getKey();
+
+                ref.child("requests").child(key).setValue(request);
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
     }
 }

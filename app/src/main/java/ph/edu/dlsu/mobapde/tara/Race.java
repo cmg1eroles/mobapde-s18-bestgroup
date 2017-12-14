@@ -16,6 +16,7 @@ public class Race {
     private String title;
     //private Place location;
     private LatLng location;
+    private String locName;
     private Date date;
 
     private HashMap<String, Boolean> users;
@@ -30,10 +31,11 @@ public class Race {
         this.title = title;
     }
 
-    public Race(String title, LatLng location, Date date) {
+    public Race(String title, LatLng location, Date date, String locName) {
         this.title = title;
         this.location = location;
         this.date = date;
+        this.locName = locName;
         //users = new ArrayList<User>();
         users = new HashMap<>();
     }
@@ -69,6 +71,14 @@ public class Race {
 
     public void setLocation(LatLng location) {
         this.location = location;
+    }
+
+    public String getLocName() {
+        return locName;
+    }
+
+    public void setLocName(String locName) {
+        this.locName = locName;
     }
 
     public Date getDate() {
@@ -115,6 +125,7 @@ public class Race {
 
         result.put("title", title);
         result.put("location", getLocation());
+        result.put("locName", locName);
         result.put("date", date);
 
         return result;

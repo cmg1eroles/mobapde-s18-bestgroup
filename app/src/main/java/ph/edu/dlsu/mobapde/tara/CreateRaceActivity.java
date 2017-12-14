@@ -136,7 +136,9 @@ public class CreateRaceActivity extends AppCompatActivity {
 
         currentTitle = etTitle.getText().toString();
 
-        currentRace = new Race(currentTitle, new LatLng(1.0, 4.0), currentDate);
+        String placeName = currentPlace.getName().toString();
+
+        currentRace = new Race(currentTitle, new LatLng(1.0, 4.0), currentDate, placeName);
 
         db = FirebaseDatabase.getInstance().getReference();
 

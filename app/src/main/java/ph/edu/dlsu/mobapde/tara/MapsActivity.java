@@ -1,6 +1,5 @@
 package ph.edu.dlsu.mobapde.tara;
 
-import android.*;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Notification;
@@ -14,6 +13,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -22,19 +22,12 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.GeoQuery;
-import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
@@ -43,21 +36,18 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -65,12 +55,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
 
+// import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import static android.graphics.Color.argb;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -349,7 +341,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             entry.getValue().longitude,
                             Constants.GEOFENCE_RADIUS_IN_METERS
                     )
-                    .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                    .setExpirationDuration(System.currentTimeMillis()) // (Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
                             Geofence.GEOFENCE_TRANSITION_EXIT)
                     .build());
@@ -365,7 +357,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             latlng.longitude,
                             Constants.GEOFENCE_RADIUS_IN_METERS
                     )
-                    .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                    .setExpirationDuration(System.currentTimeMillis())  //(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
                             Geofence.GEOFENCE_TRANSITION_EXIT)
                     .build());
@@ -375,6 +367,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .radius(500) //THIS IS IN METERS PO
                 .strokeColor(Color.BLUE)
                 .fillColor(0x220000FF)
+                .strokeWidth(5.0f)
+        );
+
+    }
+
+    private void populateGeofenceList(LatLng latlng, String key, Date date) {
+
+        Log.d("woo", "populating geofence");
+        Log.d("woo", "date.getTime() is: " + date.getTime() + "  System.currentTimeMillis():  " + System.currentTimeMillis());
+        mGeofenceList.add(new Geofence.Builder()
+                .setRequestId(key)
+                .setCircularRegion(
+                        latlng.latitude,
+                        latlng.longitude,
+                        Constants.GEOFENCE_RADIUS_IN_METERS
+                )
+                .setExpirationDuration(date.getTime() - System.currentTimeMillis())  //(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                        Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build());
+
+        mMap.addCircle(new CircleOptions()
+                .center(latlng)
+                .radius(500) //THIS IS IN METERS PO
+                .strokeColor(Color.GREEN)
+                .fillColor(Color.argb(20, 0, 255, 127))
                 .strokeWidth(5.0f)
         );
 
@@ -621,34 +639,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                             if(race.getUsers().containsKey(FirebaseAuth.getInstance().getCurrentUser().getUid())){
                                 Log.d("woo", "geofence should be on now since I am participating");
-                                populateGeofenceList(race.getLocation(),race.getTitle());
+                                Log.d("woo", "RACE PASSED: " + race.getDate());
+                                populateGeofenceList(race.getLocation(),race.getTitle(), race.getDate());
                             }
 
                         }
-                        /*
-                        String uId = noteSnapshot.getKey();
-                        Date date = noteSnapshot.child("date").getValue(Date.class);
-                        Double lat = noteSnapshot.child("location").child("latitude").getValue(Double.class);
-                        Double lng = noteSnapshot.child("location").child("longitude").getValue(Double.class);
-                        String title = (String) noteSnapshot.child("title").getValue();
-                        HashMap<String, Boolean> ulist = (HashMap<String, Boolean>) noteSnapshot.child("participants").getValue();
-                        //Race race = noteSnapshot.getValue(Race.class);
-                        Log.d("woo", "uId: " + uId + " date: " + date + " lat: " + lat + " lng: " + lng + " title: " + title + " ulist: " + ulist);
 
-                        Race race = new Race(uId, date, new LatLng(lat,lng), title, ulist);
-
-                        if(race.getUsers().containsKey(FirebaseAuth.getInstance().getCurrentUser().getUid())){
-
-                            populateGeofenceList(race.getLocation(),race.getTitle());
-                        }
-                        */
-
-                        /*
-                        ArrayList<User> ulist = race.getUsers();
-
-                        for (int i = 0; i<ulist.size(); i++)
-                            if(ulist.get(i).getId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()))
-                        */
                     }
                 }
 

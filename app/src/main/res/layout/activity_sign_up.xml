@@ -64,7 +64,7 @@
         android:text="Already registered? Log in"
         android:layout_gravity="center"
         android:id="@+id/tv_login"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="20dp"/>
 
     <ProgressBar
         android:layout_width="wrap_content"

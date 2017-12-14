@@ -89,7 +89,6 @@ public class AddUsersActivity extends AppCompatActivity {
         ref.child("users").child(currUser).child("currentRace").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                //ids[0] = dataSnapshot.getValue(String.class);
                 raceID = dataSnapshot.getValue(String.class)+"";
             }
             @Override
@@ -116,15 +115,14 @@ public class AddUsersActivity extends AppCompatActivity {
                 HashMap<String, String> request = new HashMap<>();
                 request.put("race_id", raceID);
                 request.put("sender_id", currUser);
-                request.put("receiver_id", receiverID);
 
                 Log.i("request_data", "race: " + raceID + "\n" +
                         "sender: " + currUser + "\n" +
                         "receiver: " + receiverID);
 
-                String key = ref.child("requests").push().getKey();
+                String key = ref.child("users").child(receiverID).child("requests").push().getKey();
 
-                ref.child("requests").child(key).setValue(request);
+                ref.child("users").child(receiverID).child("requests").child(key).setValue(request);
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {}

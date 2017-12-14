@@ -15,15 +15,13 @@
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/AppTheme.PopupOverlay">
 
-        <ImageButton
-            android:id="@+id/ib_profsettings"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+        <ImageView
+            android:id="@+id/iv_profsettings"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_gravity="right|top"
             android:layout_margin="@dimen/fab_margin"
-            android:background="@drawable/round_button"
             android:src="@drawable/settings"
-            android:scaleType="centerInside"
             />
 
     </android.support.v7.widget.Toolbar>

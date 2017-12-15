@@ -5,50 +5,34 @@ package ph.edu.dlsu.mobapde.tara;
  */
 
 public class Request {
-    User requester;
-    User requestee;
-    Race race;
-    boolean accepted;
+    String race_id;
+    String sender;
 
     private int listPosition;
 
-    public Request(User requester, User requestee, Race race, boolean accepted) {
-        this.requester = requester;
-        this.requestee = requestee;
-        this.race = race;
-        this.accepted = accepted;
+    public Request() {
+
     }
 
-    public User getRequester() {
-        return requester;
+    public Request(String race_id, String sender) {
+        this.race_id = race_id;
+        this.sender = sender;
     }
 
-    public void setRequester(User requester) {
-        this.requester = requester;
+    public String getRace_id() {
+        return race_id;
     }
 
-    public User getRequestee() {
-        return requestee;
+    public void setRace_id(String race_id) {
+        this.race_id = race_id;
     }
 
-    public void setRequestee(User requestee) {
-        this.requestee = requestee;
+    public String getSender() {
+        return sender;
     }
 
-    public Race getRace() {
-        return race;
-    }
-
-    public void setRace(Race race) {
-        this.race = race;
-    }
-
-    public boolean getAccepted() {
-        return accepted;
-    }
-
-    public void setAccepted(boolean accepted) {
-        this.accepted = accepted;
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 
     public int getListPosition() {
@@ -57,15 +41,5 @@ public class Request {
 
     public void setListPosition(int listPosition) {
         this.listPosition = listPosition;
-    }
-
-    @Override
-    public String toString() {
-        return "Request{" +
-                "requester=" + requester +
-                ", requestee=" + requestee +
-                ", race=" + race +
-                ", accepted=" + accepted +
-                '}';
     }
 }

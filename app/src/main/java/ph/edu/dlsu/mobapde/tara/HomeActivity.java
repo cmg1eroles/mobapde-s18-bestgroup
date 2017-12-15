@@ -61,13 +61,10 @@ public class HomeActivity extends AppCompatActivity {
             userDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Toast.makeText(getBaseContext(), "YOU ARE IN HOME", Toast.LENGTH_LONG).show();
                     String username = (String)dataSnapshot.getValue();
 
                     if(username != null)
                         buttonUser.setText(username.charAt(0) + "");
-
-                    Toast.makeText(getBaseContext(), username, Toast.LENGTH_LONG).show();
                 }
 
                 @Override

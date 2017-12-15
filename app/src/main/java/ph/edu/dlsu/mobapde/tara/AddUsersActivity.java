@@ -164,7 +164,7 @@ public class AddUsersActivity extends AppCompatActivity {
                     String key = ref.child("users").child(receiverID).child("requests").push().getKey();
 
                     ref.child("users").child(receiverID).child("requests").child(key).setValue(request);
-                    ref.child("races").child(raceID).child("participants").child(receiverID).setValue(false);
+                    ref.child("races").child(raceID).child("participants").child(receiverID).setValue("pending");
 
                     Toast.makeText(getBaseContext(), "User successfully added to the race!", Toast.LENGTH_LONG).show();
                 } else {

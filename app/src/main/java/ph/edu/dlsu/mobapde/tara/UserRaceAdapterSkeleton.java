@@ -45,6 +45,7 @@ public class UserRaceAdapterSkeleton extends RecyclerView.Adapter<UserRaceAdapte
 
         holder.tvUsername.setText(currentUser.getEmail());
         holder.tvUserInitial.setText(currentUser.getEmail().charAt(0) + "");
+        holder.tvPoints.setText(currentUser.getPoints()+" points");
         holder.itemView.setTag(currentUser);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {

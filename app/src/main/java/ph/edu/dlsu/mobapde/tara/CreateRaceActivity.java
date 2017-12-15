@@ -154,6 +154,7 @@ public class CreateRaceActivity extends AppCompatActivity {
             String key = db.child("races").push().getKey();
             db.child("races").child(key).setValue(currentRace.toMap());
             db.child("users").child(currUser.getUid()).child("currentRace").setValue(key);
+            db.child("races").child(key).child("participants").child(currUser.getUid()).setValue("accepted");
 
             Toast t = Toast.makeText(getBaseContext(), "Created: " + currentRace.toString(), Toast.LENGTH_LONG);
             t.show();

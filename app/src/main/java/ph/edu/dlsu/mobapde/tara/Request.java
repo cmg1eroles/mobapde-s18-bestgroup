@@ -5,6 +5,7 @@ package ph.edu.dlsu.mobapde.tara;
  */
 
 public class Request {
+    String id;
     String race_id;
     String sender;
 
@@ -14,9 +15,18 @@ public class Request {
 
     }
 
-    public Request(String race_id, String sender) {
+    public Request(String id, String race_id, String sender) {
+        this.id = id;
         this.race_id = race_id;
         this.sender = sender;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getRace_id() {

@@ -68,6 +68,9 @@ public class RequestFragment extends Fragment {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                     Request request = snapshot.getValue(Request.class);
+                                    request.setId(snapshot.getKey());
+
+                                    ra.addRequestHashMap(snapshot.getKey(), requests.size());
 
                                     requests.add(request);
                                     ra.setUserRequests(requests);

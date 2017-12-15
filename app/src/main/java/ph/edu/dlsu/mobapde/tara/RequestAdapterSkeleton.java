@@ -47,6 +47,8 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
     View view_btnaccept;
     View view_btndecline;
 
+    HashMap<String, Integer> rIndices = new HashMap<String, Integer>();
+
     RequestViewHolder rvh;
 
     String currRequestID = "";
@@ -55,6 +57,10 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
     public void setUserRequests(ArrayList<Request> requests) {
         this.requests = requests;
         notifyDataSetChanged();
+    }
+
+    public void addRequestHashMap(String key, Integer index) {
+        rIndices.put(key, index);
     }
 
     // DUPLICATE ^^^ delete later
@@ -73,7 +79,7 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
         requests.get(position).setListPosition(position);
         Request currentRequest = requests.get(position);
 
-        currRequestID = currentRequest.getRace_id();
+        currRequestID = currentRequest.getId();
         currSender = currentRequest.getSender();
         rvh = holder;
 
@@ -134,17 +140,6 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
                         });
                     }
                 });
-
-                rvh.btnDecline.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
-                        DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child("users").child(current.getUid()).child("requests").child(currRequestID);
-                        view_btndecline = view;
-
-                        dbref.removeValue();
-                    }
-                });
             }
 
             @Override
@@ -183,7 +178,29 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
             btnDecline.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    System.out.println("In button decline");
+                    System.out.println("CURRENT REQUEST ID: " + currRequestID);
+                    FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
+                    DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child("users").child(current.getUid()).child("requests").child(currRequestID);
 
+                    System.out.println(dbref.getKey());
+                    dbref.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            int ind = rIndices.get(dataSnapshot.getKey());
+                            dataSnapshot.getRef().removeValue();
+                            requests.remove(ind);
+
+
+                            notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                    //dbref.removeValue();
                 }
             });
         }

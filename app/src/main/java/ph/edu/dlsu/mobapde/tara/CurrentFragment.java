@@ -38,6 +38,7 @@ public class CurrentFragment extends Fragment {
 
     DatabaseReference ref;
     FirebaseUser currUser;
+    String raceID;
 
     @Nullable
     @Override
@@ -101,7 +102,7 @@ public class CurrentFragment extends Fragment {
         ref.child("users").child(currUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String raceID = dataSnapshot.getValue(User.class).getCurrentRace();
+                raceID = dataSnapshot.getValue(User.class).getCurrentRace();
                 if (raceID != null) {
                     ref.child("races").child(raceID).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -125,7 +126,16 @@ public class CurrentFragment extends Fragment {
                             tvRaceLoc.setText(dataSnapshot.child("locName").getValue(String.class));
                             tvRaceDate.setText(month + "/" + day + "/" + year);
                             tvRaceTime.setText(hrs + ":" + mins);
-                            tvNumUsers.setText(dataSnapshot.child("participants").getChildrenCount()+" Participants");
+
+                            ref.child("races").child(raceID).child("participants").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    long num = dataSnapshot.getChildrenCount();
+                                    tvNumUsers.setText(num+" Participants");
+                                }
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {}
+                            });
                         }
 
                         @Override

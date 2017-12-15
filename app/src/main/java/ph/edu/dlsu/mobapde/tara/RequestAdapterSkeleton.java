@@ -1,6 +1,7 @@
 package ph.edu.dlsu.mobapde.tara;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,19 +48,15 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
     View view_btnaccept;
     View view_btndecline;
 
-    RequestFragment rf;
-
     HashMap<String, Integer> rIndices = new HashMap<String, Integer>();
 
     RequestViewHolder rvh;
 
-    String currRaceID = "";
     String currRequestID = "";
     String currSender = "";
 
-    public void setUserRequests(ArrayList<Request> requests, RequestFragment rf) {
+    public void setUserRequests(ArrayList<Request> requests) {
         this.requests = requests;
-        this.rf = rf;
         notifyDataSetChanged();
     }
 
@@ -81,9 +78,8 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
     @Override
     public void onBindViewHolder(RequestViewHolder holder, int position) {
         requests.get(position).setListPosition(position);
-        Request currentRequest = requests.get(position);
+        final Request currentRequest = requests.get(position);
 
-        currRaceID = currentRequest.getRace_id();
         currRequestID = currentRequest.getId();
         currSender = currentRequest.getSender();
         rvh = holder;
@@ -120,6 +116,41 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
                 rvh.tvInvitedBy.setText(currSender + "");
                 rvh.tvLocation.setText(loc + "");
                 rvh.tvDate.setText(month + "/" + day + "/" + year + " | " + hrs + ":" + mins);
+
+                rvh.btnAccept.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
+                        DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child("users").child(current.getUid());
+                        view_btnaccept = view;
+
+                        dbref.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if(dataSnapshot.hasChild("currentRace")) {
+                                    Toast.makeText(view_btnaccept.getContext(), "Can't accept new race because of existing race", Toast.LENGTH_LONG).show();
+                                } else {
+                                    DatabaseReference db = FirebaseDatabase.getInstance().getReference();
+                                    db.child("users").child(currUser.getUid()).child("currentRace").setValue(currentRequest.getRace_id());
+                                    db.child("races").child(currentRequest.getRace_id()).child("participants").child(currUser.getUid()).setValue("accepted");
+
+                                    Log.i("dataSnapshot", dataSnapshot.child("requests").child(currentRequest.getId()).getKey());
+
+                                    int ind = rIndices.get(dataSnapshot.child("requests").child(currentRequest.getId()).getKey());
+                                    dataSnapshot.child("requests").child(currentRequest.getId()).getRef().removeValue();
+                                    requests.remove(ind);
+
+                                    notifyDataSetChanged();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                });
             }
 
             @Override
@@ -155,41 +186,11 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
             btnAccept = (Button) itemView.findViewById(R.id.bt_accept);
             btnDecline = (Button) itemView.findViewById(R.id.bt_decline);
 
-            btnAccept.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
-                    DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child("users").child(current.getUid());
-                    view_btnaccept = v;
-
-                    dbref.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if(dataSnapshot.hasChild("currentRace")) {
-                                Toast.makeText(view_btnaccept.getContext(), "Can't accept new race because of existing race", Toast.LENGTH_LONG).show();
-                            } else {
-                                // add race to user's current race
-                                FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
-                                DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(current.getUid());
-
-                                //HashMap<String, String> data = new HashMap<String, String>();
-                                //data.put("currentRace", currRaceID);
-                                userRef.child("currentRace").setValue(currRaceID);
-
-                                System.out.println(currRaceID);
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                        }
-                    });
-                }
-            });
-
             btnDecline.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    System.out.println("In button decline");
+                    System.out.println("CURRENT REQUEST ID: " + currRequestID);
                     FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
                     DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child("users").child(current.getUid()).child("requests").child(currRequestID);
 
@@ -201,8 +202,10 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
                             dataSnapshot.getRef().removeValue();
                             requests.remove(ind);
 
+                            DatabaseReference dbref = FirebaseDatabase.getInstance().getReference();
+                            dbref.child("races").child(dataSnapshot.child("race_id").getValue(String.class)).child("participants").child(currUser.getUid()).getRef().removeValue();
+
                             notifyDataSetChanged();
-                            rf.refreshRequest();
                         }
 
                         @Override

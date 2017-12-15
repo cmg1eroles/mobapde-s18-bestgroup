@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
@@ -41,6 +42,11 @@ public class HomeActivity extends AppCompatActivity {
     Button buttonUser;
     FirebaseAuth mAuth;
     SectionsPagerAdapter adapter;
+
+    CurrentFragment cf;
+    NoCurrentFragment ncf;
+    RequestFragment rf;
+    NoRequestFragment nrf;
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -138,21 +144,23 @@ public class HomeActivity extends AppCompatActivity {
             final String currUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
             final DatabaseReference currRaceDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID);
 
-            Toast.makeText(getBaseContext(), "ID: " + currUserID, Toast.LENGTH_LONG).show();
-
             currRaceDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(dataSnapshot.hasChild("currentRace")) {
-                        adapter.addFragment(new CurrentFragment(), "CURRENT");
+                        cf = new CurrentFragment();
+                        adapter.addFragment(cf, "CURRENT");
                     } else {
-                        adapter.addFragment(new NoCurrentFragment(), "CURRENT");
+                        ncf = new NoCurrentFragment();
+                        adapter.addFragment(ncf, "CURRENT");
                     }
 
                     if(dataSnapshot.hasChild("requests")) {
-                        adapter.addFragment(new RequestFragment(), "REQUESTS");
+                        rf = new RequestFragment();
+                        adapter.addFragment(rf, "REQUESTS");
                     } else {
-                        adapter.addFragment(new NoRequestFragment(), "REQUESTS");
+                        nrf = new NoRequestFragment();
+                        adapter.addFragment(nrf, "REQUESTS");
                     }
 
                     adapter.notifyDataSetChanged();
@@ -188,6 +196,13 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         viewPager.setAdapter(adapter);
+    }
+
+    public void refreshHome() {
+        Intent refresh = new Intent(this, HomeActivity.class);
+        refresh.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(refresh);
+        finish();
     }
 
     /**

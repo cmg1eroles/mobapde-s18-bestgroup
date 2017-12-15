@@ -15,6 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -54,6 +55,24 @@ public class HomeActivity extends AppCompatActivity {
 
         if (mAuth.getCurrentUser() != null) {
             //logged in
+            final String currUserID = mAuth.getCurrentUser().getUid();
+            final DatabaseReference userDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID).child("email");
+
+            userDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Toast.makeText(getBaseContext(), "YOU ARE IN HOME", Toast.LENGTH_LONG).show();
+                    String username = dataSnapshot.getValue(String.class);
+                    buttonUser.setText(username.charAt(0));
+
+                    Toast.makeText(getBaseContext(), username, Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         } else {
             Intent i = new Intent(HomeActivity.this, MainActivity.class);
             startActivity(i);
@@ -69,8 +88,29 @@ public class HomeActivity extends AppCompatActivity {
         fab_addRace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomeActivity.this, CreateRaceActivity.class);
-                startActivityForResult(intent, 1);
+                if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    final String currUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    final DatabaseReference currRaceDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID);
+
+                    currRaceDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.hasChild("currentRace")) {
+                                Toast.makeText(getBaseContext(), "Can't create new race because of existing race", Toast.LENGTH_LONG).show();
+                            } else {
+                                Intent intent = new Intent(HomeActivity.this, CreateRaceActivity.class);
+                                startActivityForResult(intent, 1);
+                            }
+
+                            adapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
             }
         });
 
@@ -99,15 +139,21 @@ public class HomeActivity extends AppCompatActivity {
             final String currUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
             final DatabaseReference currRaceDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID);
 
+            Toast.makeText(getBaseContext(), "ID: " + currUserID, Toast.LENGTH_LONG).show();
+
             currRaceDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(dataSnapshot.hasChild("currentRace")) {
                         adapter.addFragment(new CurrentFragment(), "CURRENT");
-                        adapter.addFragment(new RequestFragment(), "REQUESTS");
                     } else {
                         adapter.addFragment(new NoCurrentFragment(), "CURRENT");
+                    }
+
+                    if(dataSnapshot.hasChild("requests")) {
                         adapter.addFragment(new RequestFragment(), "REQUESTS");
+                    } else {
+                        adapter.addFragment(new NoRequestFragment(), "REQUESTS");
                     }
 
                     adapter.notifyDataSetChanged();

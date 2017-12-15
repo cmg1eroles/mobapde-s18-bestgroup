@@ -75,14 +75,26 @@ public class CurrentFragment extends Fragment {
         buttonTara.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
             }
         });
 
         buttonLeave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                currUser = FirebaseAuth.getInstance().getCurrentUser();
+                ref = FirebaseDatabase.getInstance().getReference();
 
+                ref.child("users").child(currUser.getUid()).child("currentRace").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        dataSnapshot.getRef().removeValue();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
         });
 

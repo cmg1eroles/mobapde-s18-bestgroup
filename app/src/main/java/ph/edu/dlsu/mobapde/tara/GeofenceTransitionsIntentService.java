@@ -53,11 +53,13 @@ import java.util.List;
 @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
 public class GeofenceTransitionsIntentService extends IntentService {
 
+    String status;
     DatabaseReference racesRef;
     long timestamp;
     long deadline;
     String deadlineID;
     long numOnTime, numEarly, numLate;
+    long points, newPoints;
     private static final String TAG = "GeofenceTransitionsIS";
 
     /**
@@ -130,6 +132,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
         }
         String triggeringGeofencesIdsString = TextUtils.join(", ",  triggeringGeofencesIdsList);
 
+        status = geofenceTransitionString;
+        
         return geofenceTransitionString + ": " + triggeringGeofencesIdsString;
     }
 
@@ -157,16 +161,44 @@ public class GeofenceTransitionsIntentService extends IntentService {
         // Get a notification builder that's compatible with platform versions >= 4
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
-        // Define the notification settings.
-        builder.setSmallIcon(R.drawable.logo)
-                // In a real app, you may want to use a library like Volley
-                // to decode the Bitmap.
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(),
-                        R.drawable.logo))
-                .setColor(Color.RED)
-                .setContentTitle(notificationDetails)
-                .setContentText(getString(R.string.geofence_transition_notification_text))
-                .setContentIntent(notificationPendingIntent);
+        if (status.equals("Arrived EARLY") || status.equals("Arrived ON TIME")){
+            // Define the notification settings.
+            builder.setSmallIcon(R.drawable.logo)
+                    // In a real app, you may want to use a library like Volley
+                    // to decode the Bitmap.
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                            R.drawable.logo))
+                    .setColor(Color.RED)
+                    .setContentTitle(notificationDetails)
+                    .setContentText("You received " + newPoints + " points")
+                    .setContentIntent(notificationPendingIntent);
+
+        }else if (status.equals("Arrived LATE")){
+            // Define the notification settings.
+            builder.setSmallIcon(R.drawable.logo)
+                    // In a real app, you may want to use a library like Volley
+                    // to decode the Bitmap.
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                            R.drawable.logo))
+                    .setColor(Color.RED)
+                    .setContentTitle(notificationDetails)
+                    .setContentText("You lost " + newPoints + " points")
+                    .setContentIntent(notificationPendingIntent);
+
+        }else{
+            // Define the notification settings.
+            builder.setSmallIcon(R.drawable.logo)
+                    // In a real app, you may want to use a library like Volley
+                    // to decode the Bitmap.
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                            R.drawable.logo))
+                    .setColor(Color.RED)
+                    .setContentTitle(notificationDetails)
+                    .setContentText("Press to open the app.")
+                    .setContentIntent(notificationPendingIntent);
+
+        }
+
 
         // Dismiss notification once the user touches it.
         builder.setAutoCancel(true);
@@ -181,7 +213,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     /*
     public int getPoints(){
-
         return (deadline - timestamp)/(timestamp + deadline) *
     }
     */
@@ -207,6 +238,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 numEarly = (long) dataSnapshot.child("numEarly").getValue();
                 numLate = (long) dataSnapshot.child("numLate").getValue();
                 numOnTime = (long) dataSnapshot.child("numOnTime").getValue();
+                points = (long) dataSnapshot.child("points").getValue();
 
                 racesRef.addValueEventListener(new ValueEventListener() {
                     @Override
@@ -240,20 +272,44 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 if (timestamp == deadline){
                     numOnTime++;
                     userRef.child("numOnTime").setValue(numOnTime);
+                    setPoints("ON TIME");
                     return "Arrived ON TIME";
                 }else if (timestamp < deadline){
                     numEarly++;
                     userRef.child("numEarly").setValue(numEarly);
+                    setPoints("EARLY");
                     return "Arrived EARLY";
                 }
-                    numLate++;
-                    userRef.child("numLate").setValue(numLate);
-                    return "Arrived LATE";
+                numLate++;
+                userRef.child("numLate").setValue(numLate);
+                setPoints("LATE");
+                return "Arrived LATE";
 
             case Geofence.GEOFENCE_TRANSITION_EXIT:
                 return getString(R.string.geofence_transition_exited);
             default:
                 return getString(R.string.unknown_geofence_transition);
+        }
+    }
+
+    public void setPoints(String status){
+        switch (status){
+            case "ON TIME":
+                points += 25;
+                newPoints = 25;
+                return;
+            case "EARLY":
+                points += 50;
+                newPoints = 50;
+                return;
+            case "LATE":
+                points -= 25;
+                newPoints = 25;
+                return;
+            default:
+                points += 0;
+                return;
+
         }
     }
 }

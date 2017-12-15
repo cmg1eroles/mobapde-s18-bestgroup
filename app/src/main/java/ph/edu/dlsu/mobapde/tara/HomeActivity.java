@@ -63,7 +63,7 @@ public class HomeActivity extends AppCompatActivity {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Toast.makeText(getBaseContext(), "YOU ARE IN HOME", Toast.LENGTH_LONG).show();
                     String username = dataSnapshot.getValue(String.class);
-                    buttonUser.setText(username.charAt(0));
+                    buttonUser.setText(username.charAt(0) + "");
 
                     Toast.makeText(getBaseContext(), username, Toast.LENGTH_LONG).show();
                 }

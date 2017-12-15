@@ -12,6 +12,13 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import org.w3c.dom.Text;
 
 public class OwnProfileActivity extends AppCompatActivity {
@@ -26,7 +33,8 @@ public class OwnProfileActivity extends AppCompatActivity {
     TextView tvNumLate;
     TextView tvNumCancelled;
 
-    RatingBar rbUserRating;
+    DatabaseReference ref;
+    String currUserID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +57,34 @@ public class OwnProfileActivity extends AppCompatActivity {
         tvNumOnTime = (TextView) findViewById(R.id.tv_prnumOnTime);
         tvNumLate = (TextView) findViewById(R.id.tv_prnumLate);
         tvNumCancelled = (TextView) findViewById(R.id.tv_prnumCancelled);
-        rbUserRating = (RatingBar) findViewById(R.id.ratingBar);
 
         ivSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(OwnProfileActivity.this, SettingsActivity.class);
                 startActivity(i);
+            }
+        });
+
+        currUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        ref = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID);
+
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User u = dataSnapshot.getValue(User.class);
+                tvInitial.setText(u.getEmail().charAt(0) + "");
+                tvUsername.setText(u.getEmail());
+                tvPoints.setText(u.getPoints());
+                tvNumEarly.setText(u.getNumEarly());
+                tvNumOnTime.setText(u.getNumOnTime());
+                tvNumLate.setText(u.getNumLate());
+                tvNumCancelled.setText(u.getNumCancelled());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
     }

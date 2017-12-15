@@ -34,7 +34,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="RACE TITLE"
+                    android:text="-"
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:textColor="@color/colorAccent"
@@ -44,21 +44,21 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Location of Race"
+                    android:text="-"
                     android:textSize="15sp"
                     android:id="@+id/tv_currloc"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Date of Race"
+                    android:text="-"
                     android:textSize="15sp"
                     android:id="@+id/tv_currdate"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Time of Race"
+                    android:text="-"
                     android:textSize="15sp"
                     android:id="@+id/tv_currtime"/>
             </LinearLayout>

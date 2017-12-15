@@ -34,15 +34,11 @@ import java.util.HashMap;
 public class RequestFragment extends Fragment {
 
     RecyclerView rvRequests;
-    DatabaseReference ref;
-
-    HashMap<String, Integer> rIndices;
 
     ArrayList<Request> requests;
     RequestAdapterSkeleton ra;
     FirebaseAuth mAuth;
     FirebaseUser currUser;
-    //FirebaseRecyclerAdapter<Request, RequestViewHolder> requestFirebaseRecyclerAdapter;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -55,16 +51,6 @@ public class RequestFragment extends Fragment {
         requests = new ArrayList<Request>();
         mAuth = FirebaseAuth.getInstance();
         currUser = mAuth.getCurrentUser();
-
-//        User user1 = new User("louise_cortez@gmail.com", "louiseeee", "hello1234");
-//        User user2 = new User("what@gmail.com", "username2", "hello1234");
-//        Race race = new Race("MOBAPDE MCO1 Meeting");
-//        Race race2 = new Race("SOFENGG Brain Storming");
-//        Race race3 = new Race("OJT Interview");
-//
-//        requests.add(new Request(user1, user2, race, false));
-//        requests.add(new Request(user1, user2, race2, false));
-//        requests.add(new Request(user1, user2, race3, false));
 
         ra = new RequestAdapterSkeleton(requests);
         rvRequests.setAdapter(ra);
@@ -80,15 +66,11 @@ public class RequestFragment extends Fragment {
                         currRequestDatabaseRef.child("requests").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                int requestnum = 0;
                                 for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    Toast.makeText(getContext(), "request #" + requestnum, Toast.LENGTH_LONG).show();
                                     Request request = snapshot.getValue(Request.class);
 
-                                    //rIndices.put(dataSnapshot.getKey(), requests.size());
                                     requests.add(request);
                                     ra.setUserRequests(requests);
-                                    requestnum++;
                                 }
                             }
                             @Override

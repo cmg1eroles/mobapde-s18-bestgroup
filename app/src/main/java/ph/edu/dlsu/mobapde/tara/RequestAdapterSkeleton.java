@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -43,6 +44,14 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
     String mins = "";
     String loc = "";
 
+    View view_btnaccept;
+    View view_btndecline;
+
+    RequestViewHolder rvh;
+
+    String currRequestID = "";
+    String currSender = "";
+
     public void setUserRequests(ArrayList<Request> requests) {
         this.requests = requests;
         notifyDataSetChanged();
@@ -64,12 +73,17 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
         requests.get(position).setListPosition(position);
         Request currentRequest = requests.get(position);
 
+        currRequestID = currentRequest.getRace_id();
+        currSender = currentRequest.getSender();
+        rvh = holder;
+
         DatabaseReference userRef = ref.child("races").child(currentRequest.getRace_id());
 
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 title = dataSnapshot.child("title").getValue(String.class);
+                System.out.println("onDataChange() 1" + title);
                 date = dataSnapshot.child("date").getValue(Date.class);
                 year = Integer.toString(date.getYear() + 1900);
                 month = Integer.toString(date.getMonth());
@@ -88,31 +102,54 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
                 } else {
                     mins = Integer.toString(m);
                 }
+
+                System.out.println("onDataChange() 2" + title);
+
+                rvh.tvTitle.setText(title + "");
+                rvh.tvInvitedBy.setText(currSender + "");
+                rvh.tvLocation.setText(loc + "");
+                rvh.tvDate.setText(month + "/" + day + "/" + year + " | " + hrs + ":" + mins);
+
+                rvh.btnAccept.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
+                        DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child("users").child(current.getUid());
+                        view_btnaccept = view;
+
+                        dbref.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if(dataSnapshot.hasChild("currentRace")) {
+                                    Toast.makeText(view_btnaccept.getContext(), "Can't accept new race because of existing race", Toast.LENGTH_LONG).show();
+                                } else {
+                                    // add race to user's current race
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                });
+
+                rvh.btnDecline.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
+                        DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child("users").child(current.getUid()).child("requests").child(currRequestID);
+                        view_btndecline = view;
+
+                        dbref.removeValue();
+                    }
+                });
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
-
-        holder.tvTitle.setText(title + "");
-        holder.tvInvitedBy.setText(currentRequest.getSender() + "");
-        holder.tvLocation.setText(loc + "");
-        holder.tvDate.setText(month + "/" + day + "/" + year + " | " + hrs + ":" + mins);
-
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /* TODO call onItemClickListener's onItemClick to trigger the
-                  call back method you created in MainActivity */
-
-                // notifyItemChanged(clickedPosition);
-
-                // REDIRECT TO USER PROFILE
-
-//                Request r = (Request) view.getTag();
-//                onItemClickListener.onItemClick(r);
             }
         });
     }
@@ -132,7 +169,7 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
         Button btnAccept;
         Button btnDecline;
 
-        public RequestViewHolder(View itemView) {
+        public RequestViewHolder(final View itemView) {
             super(itemView);
 
             tvTitle = (TextView) itemView.findViewById(R.id.tv_requesttitle);
@@ -142,6 +179,13 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
 
             btnAccept = (Button) itemView.findViewById(R.id.bt_accept);
             btnDecline = (Button) itemView.findViewById(R.id.bt_decline);
+
+            btnDecline.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
         }
 
     }

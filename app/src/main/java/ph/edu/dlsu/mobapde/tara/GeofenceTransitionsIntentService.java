@@ -1,18 +1,18 @@
 /*
- * Copyright 2017 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+        * Copyright 2017 Google Inc. All Rights Reserved.
+        *
+        * Licensed under the Apache License, Version 2.0 (the "License");
+        * you may not use this file except in compliance with the License.
+        * You may obtain a copy of the License at
+        *
+        * http://www.apache.org/licenses/LICENSE-2.0
+        *
+        * Unless required by applicable law or agreed to in writing, software
+        * distributed under the License is distributed on an "AS IS" BASIS,
+        * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        * See the License for the specific language governing permissions and
+        * limitations under the License.
+        */
 
 package ph.edu.dlsu.mobapde.tara;
 
@@ -53,6 +53,7 @@ import java.util.List;
 @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
 public class GeofenceTransitionsIntentService extends IntentService {
 
+    String message;
     String status;
     DatabaseReference racesRef;
     long timestamp;
@@ -80,6 +81,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
+
+        Log.d("woo", " !!!!!!! omae wa mo shindeiru");
+
         if (geofencingEvent.hasError()) {
             String errorMessage = GeofenceErrorMessages.getErrorString(this,
                     geofencingEvent.getErrorCode());
@@ -94,18 +98,20 @@ public class GeofenceTransitionsIntentService extends IntentService {
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
                 geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
+            Log.d("woo", "*************** geofenceTransition !!!!!!!!");
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
             // Get the transition details as a String.
-            String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
-                    triggeringGeofences);
+            //String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
+            //        triggeringGeofences);
 
+            getTransitionString(geofenceTransition, triggeringGeofences);
             // Send notification and log the transition details.
 
             Log.d("ito", "sending notif");
-            sendNotification(geofenceTransitionDetails);
-            Log.d("ito", geofenceTransitionDetails);
+            //sendNotification(message);
+            Log.d("ito", message + "");
         } else {
             // Log the error.
             Log.d("ito", getString(R.string.geofence_transition_invalid_type, geofenceTransition));
@@ -123,8 +129,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
             int geofenceTransition,
             List<Geofence> triggeringGeofences) {
 
-        String geofenceTransitionString = getTransitionString(geofenceTransition);
+        //String geofenceTransitionString = getTransitionString(geofenceTransition);
 
+        //getTransitionString(geofenceTransition);
+
+        Log.d("woo", "geofenceTransitionString is: " + status);
         // Get the Ids of each geofence that was triggered.
         ArrayList<String> triggeringGeofencesIdsList = new ArrayList<>();
         for (Geofence geofence : triggeringGeofences) {
@@ -132,9 +141,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
         }
         String triggeringGeofencesIdsString = TextUtils.join(", ",  triggeringGeofencesIdsList);
 
-        status = geofenceTransitionString;
-        
-        return geofenceTransitionString + ": " + triggeringGeofencesIdsString;
+        Log.d("woo", "Notif has: " + triggeringGeofencesIdsString);
+        return status + ": " + triggeringGeofencesIdsString;
     }
 
     /**
@@ -142,6 +150,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
      * If the user clicks the notification, control goes to the MainActivity.
      */
     private void sendNotification(String notificationDetails) {
+
+        Log.d("shin", "send notification STATUS: " + status);
+
         // Create an explicit content Intent that starts the main Activity.
         Intent notificationIntent = new Intent(getApplicationContext(), MapsActivity.class);
 
@@ -161,54 +172,57 @@ public class GeofenceTransitionsIntentService extends IntentService {
         // Get a notification builder that's compatible with platform versions >= 4
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
-        if (status.equals("Arrived EARLY") || status.equals("Arrived ON TIME")){
-            // Define the notification settings.
-            builder.setSmallIcon(R.drawable.logo)
-                    // In a real app, you may want to use a library like Volley
-                    // to decode the Bitmap.
-                    .setLargeIcon(BitmapFactory.decodeResource(getResources(),
-                            R.drawable.logo))
-                    .setColor(Color.RED)
-                    .setContentTitle(notificationDetails)
-                    .setContentText("You received " + newPoints + " points")
-                    .setContentIntent(notificationPendingIntent);
+        if (status != null){
+            if (status.equals("Arrived EARLY") || status.equals("Arrived ON TIME")){
+                // Define the notification settings.
+                builder.setSmallIcon(R.drawable.logo)
+                        // In a real app, you may want to use a library like Volley
+                        // to decode the Bitmap.
+                        .setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                                R.drawable.logo))
+                        .setColor(Color.RED)
+                        .setContentTitle(notificationDetails)
+                        .setContentText("You received " + newPoints + " points")
+                        .setContentIntent(notificationPendingIntent);
 
-        }else if (status.equals("Arrived LATE")){
-            // Define the notification settings.
-            builder.setSmallIcon(R.drawable.logo)
-                    // In a real app, you may want to use a library like Volley
-                    // to decode the Bitmap.
-                    .setLargeIcon(BitmapFactory.decodeResource(getResources(),
-                            R.drawable.logo))
-                    .setColor(Color.RED)
-                    .setContentTitle(notificationDetails)
-                    .setContentText("You lost " + newPoints + " points")
-                    .setContentIntent(notificationPendingIntent);
+            }else if (status.equals("Arrived LATE")){
+                // Define the notification settings.
+                builder.setSmallIcon(R.drawable.logo)
+                        // In a real app, you may want to use a library like Volley
+                        // to decode the Bitmap.
+                        .setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                                R.drawable.logo))
+                        .setColor(Color.RED)
+                        .setContentTitle(notificationDetails)
+                        .setContentText("You lost " + newPoints + " points")
+                        .setContentIntent(notificationPendingIntent);
 
-        }else{
-            // Define the notification settings.
-            builder.setSmallIcon(R.drawable.logo)
-                    // In a real app, you may want to use a library like Volley
-                    // to decode the Bitmap.
-                    .setLargeIcon(BitmapFactory.decodeResource(getResources(),
-                            R.drawable.logo))
-                    .setColor(Color.RED)
-                    .setContentTitle(notificationDetails)
-                    .setContentText("Press to open the app.")
-                    .setContentIntent(notificationPendingIntent);
+            }else{
+                // Define the notification settings.
+                builder.setSmallIcon(R.drawable.logo)
+                        // In a real app, you may want to use a library like Volley
+                        // to decode the Bitmap.
+                        .setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                                R.drawable.logo))
+                        .setColor(Color.RED)
+                        .setContentTitle(notificationDetails)
+                        .setContentText("Press to open the app.")
+                        .setContentIntent(notificationPendingIntent);
 
+            }
+
+
+            // Dismiss notification once the user touches it.
+            builder.setAutoCancel(true);
+
+            // Get an instance of the Notification manager
+            NotificationManager mNotificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            // Issue the notification
+            mNotificationManager.notify(0, builder.build());
         }
 
-
-        // Dismiss notification once the user touches it.
-        builder.setAutoCancel(true);
-
-        // Get an instance of the Notification manager
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // Issue the notification
-        mNotificationManager.notify(0, builder.build());
     }
 
     /*
@@ -223,14 +237,18 @@ public class GeofenceTransitionsIntentService extends IntentService {
      * @param transitionType    A transition type constant defined in Geofence
      * @return                  A String indicating the type of transition
      */
-    private String getTransitionString(int transitionType) {
+    private void getTransitionString(final int transitionType, final List<Geofence> triggeringGeofences) {
+
+        String itona;
+        Log.d("woo", "getTransitionString woo yes");
+
         String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userID);
+        final DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userID);
 
 
 
 
-        userRef.addValueEventListener(new ValueEventListener() {
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 deadlineID = (String) dataSnapshot.child("currentRace").getValue();
@@ -240,10 +258,66 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 numOnTime = (long) dataSnapshot.child("numOnTime").getValue();
                 points = (long) dataSnapshot.child("points").getValue();
 
-                racesRef.addValueEventListener(new ValueEventListener() {
+
+                racesRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         deadline = (long) dataSnapshot.child("time").getValue();
+
+                        Log.d("woo", "deadline is: " + deadline);
+                        switch (transitionType) {
+                            case Geofence.GEOFENCE_TRANSITION_ENTER:
+
+
+                                timestamp = System.currentTimeMillis();
+                                Log.d("woo", "timestamp is: " + timestamp);
+                                if (timestamp == deadline){
+                                    numOnTime++;
+                                    userRef.child("numOnTime").setValue(numOnTime);
+                                    setPoints("ON TIME");
+                                    userRef.child("points").setValue(points);
+                                    status =  "Arrived ON TIME";
+                                    Log.d("woo", "INSIDE SWITCH " + status);
+                                    break;
+                                }else if (timestamp < deadline){
+                                    numEarly++;
+                                    userRef.child("numEarly").setValue(numEarly);
+                                    setPoints("EARLY");
+                                    userRef.child("points").setValue(points);
+                                    status =  "Arrived EARLY";
+                                    Log.d("woo", "INSIDE SWITCH " + status);
+                                    break;
+                                }else{
+                                    numLate++;
+                                    userRef.child("numLate").setValue(numLate);
+                                    setPoints("LATE");
+                                    userRef.child("points").setValue(points);
+                                    status =  "Arrived LATE";
+                                    Log.d("woo", "INSIDE SWITCH " + status);
+                                    break;
+
+                                }
+
+                            case Geofence.GEOFENCE_TRANSITION_EXIT:
+                                status = "Exited";
+                                Log.d("woo", "INSIDE SWITCH " + status);
+                                break;
+                            //return getString(R.string.geofence_transition_exited);
+                            default:
+                                status = "Tara";
+                                Log.d("woo", "INSIDE SWITCH " + status);
+                                break;
+                            //return getString(R.string.unknown_geofence_transition);
+                        }
+
+                        ArrayList<String> triggeringGeofencesIdsList = new ArrayList<>();
+                        for (Geofence geofence : triggeringGeofences) {
+                            triggeringGeofencesIdsList.add(geofence.getRequestId());
+                        }
+
+                        message = status + ":" + TextUtils.join(", ",  triggeringGeofencesIdsList);
+                        Log.d("woo", "The message is: " + message);
+                        sendNotification(message);
                     }
 
                     @Override
@@ -251,6 +325,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
                     }
                 });
+
+
             }
 
             @Override
@@ -263,34 +339,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         // Intent intent = new Intent(getBaseContext(), ArrivedDialog.class);
 
+        //return status;
 
-        switch (transitionType) {
-            case Geofence.GEOFENCE_TRANSITION_ENTER:
-
-
-                timestamp = System.currentTimeMillis();
-                if (timestamp == deadline){
-                    numOnTime++;
-                    userRef.child("numOnTime").setValue(numOnTime);
-                    setPoints("ON TIME");
-                    return "Arrived ON TIME";
-                }else if (timestamp < deadline){
-                    numEarly++;
-                    userRef.child("numEarly").setValue(numEarly);
-                    setPoints("EARLY");
-                    return "Arrived EARLY";
-                }
-                numLate++;
-                userRef.child("numLate").setValue(numLate);
-                setPoints("LATE");
-                return "Arrived LATE";
-
-            case Geofence.GEOFENCE_TRANSITION_EXIT:
-                return getString(R.string.geofence_transition_exited);
-            default:
-                return getString(R.string.unknown_geofence_transition);
-        }
     }
+
+
 
     public void setPoints(String status){
         switch (status){

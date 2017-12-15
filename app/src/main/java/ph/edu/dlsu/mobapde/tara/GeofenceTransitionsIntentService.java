@@ -40,8 +40,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Listener for geofence transition changes.
@@ -223,6 +225,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
             mNotificationManager.notify(0, builder.build());
         }
 
+
+
+
     }
 
     /*
@@ -263,15 +268,20 @@ public class GeofenceTransitionsIntentService extends IntentService {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         deadline = (long) dataSnapshot.child("time").getValue();
+                        Date dateDead = dataSnapshot.getValue(Date.class);
 
-                        Log.d("woo", "deadline is: " + deadline);
+                        Log.d("woo", "dateDead is: " + dateDead);
                         switch (transitionType) {
                             case Geofence.GEOFENCE_TRANSITION_ENTER:
 
 
                                 timestamp = System.currentTimeMillis();
-                                Log.d("woo", "timestamp is: " + timestamp);
-                                if (timestamp == deadline){
+                                String timeZone = Calendar.getInstance().getTimeZone().getID();
+                                Date local = new Date(timestamp + TimeZone.getTimeZone(timeZone).getOffset(timestamp));
+
+
+                                Log.d("woo", "local is: " + local);
+                                if (local.compareTo(dateDead)==0){
                                     numOnTime++;
                                     userRef.child("numOnTime").setValue(numOnTime);
                                     setPoints("ON TIME");
@@ -279,7 +289,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                                     status =  "Arrived ON TIME";
                                     Log.d("woo", "INSIDE SWITCH " + status);
                                     break;
-                                }else if (timestamp < deadline){
+                                }else if (local.compareTo(dateDead)<0){
                                     numEarly++;
                                     userRef.child("numEarly").setValue(numEarly);
                                     setPoints("EARLY");

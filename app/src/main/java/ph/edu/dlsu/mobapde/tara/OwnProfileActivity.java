@@ -1,5 +1,4 @@
 package ph.edu.dlsu.mobapde.tara;
-
 import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -74,12 +73,12 @@ public class OwnProfileActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User u = dataSnapshot.getValue(User.class);
                 tvInitial.setText(u.getEmail().charAt(0) + "");
-                tvUsername.setText(u.getEmail());
-                tvPoints.setText(u.getPoints());
-                tvNumEarly.setText(u.getNumEarly());
-                tvNumOnTime.setText(u.getNumOnTime());
-                tvNumLate.setText(u.getNumLate());
-                tvNumCancelled.setText(u.getNumCancelled());
+                tvUsername.setText(u.getEmail() + "");
+                tvPoints.setText(u.getPoints() + "");
+                tvNumEarly.setText(u.getNumEarly() + "");
+                tvNumOnTime.setText(u.getNumOnTime() + "");
+                tvNumLate.setText(u.getNumLate() + "");
+                tvNumCancelled.setText(u.getNumCancelled() + "");
             }
 
             @Override

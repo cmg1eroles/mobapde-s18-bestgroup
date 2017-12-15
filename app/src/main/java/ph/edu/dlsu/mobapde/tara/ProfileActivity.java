@@ -14,6 +14,20 @@ import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RatingBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -62,21 +76,24 @@ public class ProfileActivity extends AppCompatActivity {
         tvNumCancelled = (TextView) findViewById(R.id.tv_numCancelled);
         llClickable = (LinearLayout) findViewById(R.id.ll_clickablerate);
 
-        ref.child("users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User u = dataSnapshot.getValue(User.class);
-                tvInitial.setText((u.getEmail().charAt(0)+"").toUpperCase());
-                tvUsername.setText(u.getEmail());
-                tvPoints.setText("Points: " + u.getPoints());
-                tvNumEarly.setText(u.getNumEarly()+"");
-                tvNumOnTime.setText(u.getNumOnTime()+"");
-                tvNumLate.setText(u.getNumLate()+"");
-                tvNumCancelled.setText(u.getNumCancelled()+"");
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
+        if (userID != null){
+            ref.child("users").child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    User u = dataSnapshot.getValue(User.class);
+                    tvInitial.setText((u.getEmail().charAt(0)+"").toUpperCase());
+                    tvUsername.setText(u.getEmail() + "");
+                    tvPoints.setText("Points: " + u.getPoints());
+                    tvNumEarly.setText(u.getNumEarly()+"");
+                    tvNumOnTime.setText(u.getNumOnTime()+"");
+                    tvNumLate.setText(u.getNumLate()+"");
+                    tvNumCancelled.setText(u.getNumCancelled()+"");
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {}
+            });
+        }
+
     }
 
     public boolean onOptionsItemSelected(MenuItem item){

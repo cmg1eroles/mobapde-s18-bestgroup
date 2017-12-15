@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,7 +33,6 @@ import java.util.HashMap;
 
 public class RequestFragment extends Fragment {
 
-    TextView tvNoRequests;
     RecyclerView rvRequests;
     DatabaseReference ref;
 
@@ -51,7 +51,6 @@ public class RequestFragment extends Fragment {
         final String currUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         final DatabaseReference requestDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID).child("requests");
 
-        tvNoRequests = (TextView) view.findViewById(R.id.tv_norequests);
         rvRequests = (RecyclerView) view.findViewById(R.id.rv_requests);
         requests = new ArrayList<Request>();
         mAuth = FirebaseAuth.getInstance();
@@ -78,11 +77,12 @@ public class RequestFragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(dataSnapshot.hasChild("requests")) {
-                        tvNoRequests.setVisibility(LinearLayout.INVISIBLE);
                         currRequestDatabaseRef.child("requests").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
+                                int requestnum = 0;
                                 for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                    Toast.makeText(getContext(), "request #" + requestnum, Toast.LENGTH_LONG).show();
 //                                    Request request = snapshot.getValue(Request.class);
 //
 //                                    rIndices.put(dataSnapshot.getKey(), requests.size());
@@ -94,7 +94,6 @@ public class RequestFragment extends Fragment {
                             public void onCancelled(DatabaseError databaseError) {}
                         });
                     } else {
-                        tvNoRequests.setVisibility(LinearLayout.VISIBLE);
                     }
                 }
 

@@ -1,7 +1,6 @@
 package ph.edu.dlsu.mobapde.tara;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +47,8 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
     View view_btnaccept;
     View view_btndecline;
 
+    RequestFragment rf;
+
     HashMap<String, Integer> rIndices = new HashMap<String, Integer>();
 
     RequestViewHolder rvh;
@@ -55,8 +56,9 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
     String currRequestID = "";
     String currSender = "";
 
-    public void setUserRequests(ArrayList<Request> requests) {
+    public void setUserRequests(ArrayList<Request> requests, RequestFragment rf) {
         this.requests = requests;
+        this.rf = rf;
         notifyDataSetChanged();
     }
 
@@ -78,7 +80,7 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
     @Override
     public void onBindViewHolder(RequestViewHolder holder, int position) {
         requests.get(position).setListPosition(position);
-        final Request currentRequest = requests.get(position);
+        Request currentRequest = requests.get(position);
 
         currRequestID = currentRequest.getId();
         currSender = currentRequest.getSender();
@@ -130,17 +132,7 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
                                 if(dataSnapshot.hasChild("currentRace")) {
                                     Toast.makeText(view_btnaccept.getContext(), "Can't accept new race because of existing race", Toast.LENGTH_LONG).show();
                                 } else {
-                                    DatabaseReference db = FirebaseDatabase.getInstance().getReference();
-                                    db.child("users").child(currUser.getUid()).child("currentRace").setValue(currentRequest.getRace_id());
-                                    db.child("races").child(currentRequest.getRace_id()).child("participants").child(currUser.getUid()).setValue("accepted");
-
-                                    Log.i("dataSnapshot", dataSnapshot.child("requests").child(currentRequest.getId()).getKey());
-
-                                    int ind = rIndices.get(dataSnapshot.child("requests").child(currentRequest.getId()).getKey());
-                                    dataSnapshot.child("requests").child(currentRequest.getId()).getRef().removeValue();
-                                    requests.remove(ind);
-
-                                    notifyDataSetChanged();
+                                    // add race to user's current race
                                 }
                             }
 
@@ -202,10 +194,8 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
                             dataSnapshot.getRef().removeValue();
                             requests.remove(ind);
 
-                            DatabaseReference dbref = FirebaseDatabase.getInstance().getReference();
-                            dbref.child("races").child(dataSnapshot.child("race_id").getValue(String.class)).child("participants").child(currUser.getUid()).getRef().removeValue();
-
                             notifyDataSetChanged();
+                            rf.refreshRequest();
                         }
 
                         @Override

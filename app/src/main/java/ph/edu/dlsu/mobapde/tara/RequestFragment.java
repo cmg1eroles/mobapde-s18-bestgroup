@@ -73,7 +73,7 @@ public class RequestFragment extends Fragment {
                                     ra.addRequestHashMap(snapshot.getKey(), requests.size());
 
                                     requests.add(request);
-                                    ra.setUserRequests(requests);
+                                    ra.setUserRequests(requests, RequestFragment.this);
                                 }
                             }
                             @Override
@@ -91,6 +91,11 @@ public class RequestFragment extends Fragment {
         }
     }
 
+    public void refreshRequest() {
+        if(requests.size() == 0) {
+            ((HomeActivity) getActivity()).refreshHome();
+        }
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

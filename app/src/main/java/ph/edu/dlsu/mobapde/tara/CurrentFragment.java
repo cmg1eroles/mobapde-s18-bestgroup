@@ -38,7 +38,6 @@ public class CurrentFragment extends Fragment {
 
     DatabaseReference ref;
     FirebaseUser currUser;
-    String raceID;
 
     @Nullable
     @Override
@@ -89,6 +88,7 @@ public class CurrentFragment extends Fragment {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         dataSnapshot.getRef().removeValue();
+                        ((HomeActivity) getActivity()).refreshHome();
                     }
 
                     @Override
@@ -102,7 +102,7 @@ public class CurrentFragment extends Fragment {
         ref.child("users").child(currUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                raceID = dataSnapshot.getValue(User.class).getCurrentRace();
+                String raceID = dataSnapshot.getValue(User.class).getCurrentRace();
                 if (raceID != null) {
                     ref.child("races").child(raceID).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -126,16 +126,7 @@ public class CurrentFragment extends Fragment {
                             tvRaceLoc.setText(dataSnapshot.child("locName").getValue(String.class));
                             tvRaceDate.setText(month + "/" + day + "/" + year);
                             tvRaceTime.setText(hrs + ":" + mins);
-
-                            ref.child("races").child(raceID).child("participants").addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    long num = dataSnapshot.getChildrenCount();
-                                    tvNumUsers.setText(num+" Participants");
-                                }
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {}
-                            });
+                            tvNumUsers.setText(dataSnapshot.child("participants").getChildrenCount()+" Participants");
                         }
 
                         @Override

@@ -22,6 +22,8 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -56,6 +58,7 @@ public class CreateRaceActivity extends AppCompatActivity {
     Place currentPlace;
 
     DatabaseReference db;
+    FirebaseUser currUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +83,8 @@ public class CreateRaceActivity extends AppCompatActivity {
         buttonDate = (Button) findViewById(R.id.button_date);
         buttonTime =(Button) findViewById(R.id.button_time);
         buttonCreateMeeting = (Button) findViewById(R.id.button_createmeeting);
+
+        currUser = FirebaseAuth.getInstance().getCurrentUser();
 
         buttonLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,7 +112,6 @@ public class CreateRaceActivity extends AppCompatActivity {
             public void onClick(View v) {
                 try {
                     onCreateRaceButtonClick();
-                    finish();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -116,41 +120,50 @@ public class CreateRaceActivity extends AppCompatActivity {
     }
 
     public void onCreateRaceButtonClick() throws ParseException {
-        String currMonth, currDay;
+        Calendar current = Calendar.getInstance();
+        Calendar chosen = Calendar.getInstance();
+        chosen.set(chosenYear, chosenMonth, chosenDay, chosenHour, chosenMinute);
 
-        if(chosenDay < 10) {
-            currDay = "0" + chosenDay;
-        } else {
-            currDay = "" + chosenDay;
-        }
+        if (chosen.after(current)) {
+            String currMonth, currDay;
 
-        if(chosenMonth < 10) {
-            currMonth = "0" + chosenMonth;
-        } else {
-            currMonth = "" + chosenMonth;
-        }
+            if(chosenDay < 10) {
+                currDay = "0" + chosenDay;
+            } else {
+                currDay = "" + chosenDay;
+            }
 
-        sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        currentDate = sdfDate.parse(chosenYear + "-" + (chosenMonth + 1) + "-" + chosenDay
+            if(chosenMonth < 10) {
+                currMonth = "0" + chosenMonth;
+            } else {
+                currMonth = "" + chosenMonth;
+            }
+
+            sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            currentDate = sdfDate.parse(chosenYear + "-" + (chosenMonth + 1) + "-" + chosenDay
                     + " " + chosenHour + ":" + chosenMinute + ":59");
 
-        currentTitle = etTitle.getText().toString();
+            currentTitle = etTitle.getText().toString();
 
-        String placeName = currentPlace.getName().toString();
+            String placeName = currentPlace.getName().toString();
 
-        currentRace = new Race(currentTitle, new LatLng(1.0, 4.0), currentDate, placeName);
+            currentRace = new Race(currentTitle, new LatLng(1.0, 4.0), currentDate, placeName);
 
-        db = FirebaseDatabase.getInstance().getReference();
+            db = FirebaseDatabase.getInstance().getReference();
 
-        String key = db.child("races").push().getKey();
-        db.child("races").child(key).setValue(currentRace.toMap());
+            String key = db.child("races").push().getKey();
+            db.child("races").child(key).setValue(currentRace.toMap());
+            db.child("users").child(currUser.getUid()).child("currentRace").setValue(key);
 
-        Toast t = Toast.makeText(getBaseContext(), "Created: " + currentRace.toString(), Toast.LENGTH_LONG);
-        t.show();
+            Toast t = Toast.makeText(getBaseContext(), "Created: " + currentRace.toString(), Toast.LENGTH_LONG);
+            t.show();
 
-        Intent i = new Intent(CreateRaceActivity.this, HomeActivity.class);
-        startActivity(i);
-        finish();
+            Intent i = new Intent(CreateRaceActivity.this, HomeActivity.class);
+            startActivity(i);
+            finish();
+        } else {
+            Toast.makeText(getBaseContext(), "The race date and time must be after the current date and time!", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void onLocationClick() {

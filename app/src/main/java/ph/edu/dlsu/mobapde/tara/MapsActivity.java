@@ -687,10 +687,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                            users.get(note.getUid()).getM().remove();
 
                        users.put(note.getUid(), note);
-
-                        if(Double.parseDouble(note.getLat()) == notifArea.latitude && Double.parseDouble(note.getLng()) == notifArea.longitude)
-                            sendNotification("Tara", String.format("%s is at the finish line", note.getEmail()));
-
                     }
 
                     for (String key: users.keySet()){

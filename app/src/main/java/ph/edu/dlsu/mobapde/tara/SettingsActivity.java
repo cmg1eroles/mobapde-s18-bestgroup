@@ -32,7 +32,6 @@ import com.google.firebase.database.ValueEventListener;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    TextView tvChangeUN;
     TextView tvChangePW;
     TextView tvLogout;
 
@@ -51,20 +50,11 @@ public class SettingsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        tvChangeUN = (TextView) findViewById(R.id.tv_cusername);
         tvChangePW = (TextView) findViewById(R.id.tv_cpassword);
         tvLogout = (TextView) findViewById(R.id.tv_logout);
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance().getReference();
-
-        tvChangeUN.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ChangeUsernameDialog cud = new ChangeUsernameDialog();
-                cud.show(getFragmentManager(), "");
-            }
-        });
 
         tvChangePW.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,10 +90,6 @@ public class SettingsActivity extends AppCompatActivity {
         startActivity(i);
 
         return true;
-    }
-
-    public void changeUsername(String newUsername) {
-        // need pa ba username since email nalang naman
     }
 
     public void changePassword(String oldPassword, final String newPassword, String confirmPassword) {

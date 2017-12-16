@@ -30,6 +30,8 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
@@ -94,11 +96,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     VerticalSeekBar mSeekBar;
 
+    Race race;
+
     /**
      * Tracks whether the user requested to add or remove geofences, or to do neither.
      */
     private enum PendingGeofenceTask {
-        ADD, REMOVE, NONE
+        ADD, REMOVE, NONE, STOP;
     }
 
     /**
@@ -281,7 +285,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
 
-        mGeofencingClient.removeGeofences(getGeofencePendingIntent()).addOnCompleteListener(this);
+        //mGeofencingClient.removeGeofences(getGeofencePendingIntent()).addOnCompleteListener(this);
+
+        mGeofencingClient.removeGeofences(getGeofencePendingIntent())
+                .addOnSuccessListener(this, new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("ito", "Geofence is removed");
+
+                    }
+                })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("ito", "Geofence is NOT removed");
+
+                    }
+                });
+
     }
 
 
@@ -328,15 +349,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-        /**
-         * This sample hard codes geofence data. A real app might dynamically create geofences based on
-         * the user's location.
-         */
+    /**
+     * This sample hard codes geofence data. A real app might dynamically create geofences based on
+     * the user's location.
+     */
     private void populateGeofenceList() {
         Log.d("woo", "populating geofence");
         for (Map.Entry<String, LatLng> entry : Constants.BAY_AREA_LANDMARKS.entrySet()) {
 
-        //for (Map.Entry<String, LatLng> entry : ) {
+            //for (Map.Entry<String, LatLng> entry : ) {
             mGeofenceList.add(new Geofence.Builder()
                     .setRequestId(entry.getKey())
                     .setCircularRegion(
@@ -353,17 +374,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void populateGeofenceList(LatLng latlng, String key) {
         Log.d("ito", "populating geofence");
-           mGeofenceList.add(new Geofence.Builder()
-                    .setRequestId(key)
-                    .setCircularRegion(
-                            latlng.latitude,
-                            latlng.longitude,
-                            Constants.GEOFENCE_RADIUS_IN_METERS
-                    )
-                    .setExpirationDuration(System.currentTimeMillis())  //(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
-                            Geofence.GEOFENCE_TRANSITION_EXIT)
-                    .build());
+        mGeofenceList.add(new Geofence.Builder()
+                .setRequestId(key)
+                .setCircularRegion(
+                        latlng.latitude,
+                        latlng.longitude,
+                        Constants.GEOFENCE_RADIUS_IN_METERS
+                )
+                .setExpirationDuration(System.currentTimeMillis())  //(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                        Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build());
 
         mMap.addCircle(new CircleOptions()
                 .center(latlng)
@@ -460,6 +481,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             addGeofences();
         } else if (mPendingGeofenceTask == PendingGeofenceTask.REMOVE) {
             removeGeofences();
+        }else if (mPendingGeofenceTask == PendingGeofenceTask.STOP){
+            stopGeoFencing();
         }
     }
 
@@ -617,7 +640,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
 
 
-                    @Override
+                @Override
                 public void onCancelled(DatabaseError databaseError) {
 
                 }
@@ -638,25 +661,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 String dateOfRace = (date.getYear()+1900) + "/" + (date.getMonth()) + "/" + date.getDate();
                                 String dateToday = calendar.get(Calendar.YEAR) + "/" + calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.DAY_OF_MONTH);
                                 Log.d("woo", dateOfRace + " AND " + dateToday);
-                                    if ( dateOfRace.equals(dateToday)){
-                                        String uId = noteSnapshot.getKey();
-                                        //Date date = noteSnapshot.child("date").getValue(Date.class);
-                                        Double lat = noteSnapshot.child("location").child("latitude").getValue(Double.class);
-                                        Double lng = noteSnapshot.child("location").child("longitude").getValue(Double.class);
-                                        String title = (String) noteSnapshot.child("title").getValue();
+                                if ( dateOfRace.equals(dateToday)){
+                                    String uId = noteSnapshot.getKey();
+                                    //Date date = noteSnapshot.child("date").getValue(Date.class);
+                                    Double lat = noteSnapshot.child("location").child("latitude").getValue(Double.class);
+                                    Double lng = noteSnapshot.child("location").child("longitude").getValue(Double.class);
+                                    String title = (String) noteSnapshot.child("title").getValue();
 
-                                        //Race race = noteSnapshot.getValue(Race.class);
-                                        Log.d("woo", "uId: " + uId + " date: " + date + " lat: " + lat + " lng: " + lng + " title: " + title + " ulist: " + ulist);
+                                    //Race race = noteSnapshot.getValue(Race.class);
+                                    Log.d("woo", "uId: " + uId + " date: " + date + " lat: " + lat + " lng: " + lng + " title: " + title + " ulist: " + ulist);
 
-                                        Race race = new Race(uId, date, new LatLng(lat,lng), title, ulist);
+                                    race = new Race(uId, date, new LatLng(lat,lng), title, ulist);
 
-                                        //if(race.getUsers().containsKey(FirebaseAuth.getInstance().getCurrentUser().getUid())){
-                                            Log.d("woo", "geofence should be on now since I am participating");
-                                            Log.d("woo", "RACE PASSED: " + race.getDate());
-                                            populateGeofenceList(race.getLocation(),race.getTitle(), race.getDate());
-                                        //}
+                                    //if(race.getUsers().containsKey(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                                    Log.d("woo", "geofence should be on now since I am participating");
+                                    Log.d("woo", "RACE PASSED: " + race.getDate());
+                                    populateGeofenceList(race.getLocation(),race.getTitle(), race.getDate());
+                                    //}
 
-                                    }
+                                }
 
                             }
 
@@ -672,7 +695,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             });
 
             counterRef.addValueEventListener(new ValueEventListener() {
-            //counterRef.addChildEventListener(new ChildEventListener() {
+                //counterRef.addChildEventListener(new ChildEventListener() {
                 //int ctr = 0;
 
 
@@ -682,11 +705,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     for (DataSnapshot noteSnapshot: dataSnapshot.getChildren()){
                         Tracking note = noteSnapshot.getValue(Tracking.class);
-                       Log.d("ITO", "HASH MAP: " + users);
-                       if (users.containsKey(note.getUid()))
-                           users.get(note.getUid()).getM().remove();
+                        Log.d("ITO", "HASH MAP: " + users);
+                        if (users.containsKey(note.getUid())){
+                            if (users.get(note.getUid()).getM() != null)
+                                users.get(note.getUid()).getM().remove();
+                        }
 
-                       users.put(note.getUid(), note);
+
+                        users.put(note.getUid(), note);
                     }
 
                     for (String key: users.keySet()){
@@ -705,13 +731,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     .snippet(users.get(key).getEmail())));
 
                         }else{
-                            users.get(key).setM(mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(users.get(key).getLat()), Double.parseDouble(users.get(key).getLng())))
-                                    .title(users.get(key).getEmail())
-                                    .snippet(users.get(key).getEmail())
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))));
+                            if (race != null){
+                                if (race.getUsers().containsKey(key)){
+                                    Log.d("woo", "race.getUsers(): " + "key: " + key);
+                                    users.get(key).setM(mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(users.get(key).getLat()), Double.parseDouble(users.get(key).getLng())))
+                                            .title(users.get(key).getEmail())
+                                            .snippet(users.get(key).getEmail())
+                                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))));
+
+                                }
+                            }
+
                         }
 
-                            Log.d("ITO", "****************" + users.get(key).getEmail() + " has the M " + users.get(key).getM());
+                        Log.d("ITO", "****************" + users.get(key).getEmail() + " has the M " + users.get(key).getM());
                         //markers.add(m);
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 12.0f));
 
@@ -719,61 +752,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
 
-
-                /*
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    Log.d("ITO", "LAMAN NG HASHMAP USERS: " + users);
-                    Tracking newUser = dataSnapshot.getValue(Tracking.class);
-                    newUser.setM(mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(newUser.getLat()), Double.parseDouble(newUser.getLng())))
-                            .title(newUser.getEmail())
-                            .snippet(newUser.getEmail())));
-                    Log.d("ITO", "****************" + newUser.getEmail() + " has the M " + newUser.getM());
-                    //markers.add(m);
-                    if (users.containsKey(s)) {
-                        Log.d("ITO", ">>>>>>>>>>  " + users.get(s).getEmail() + " was removed");
-                        users.get(newUser.getUid()).getM().remove();
-                        users.remove(newUser.getUid());
-                    }
-
-                    Log.d("ITO", ">!>!>!>!  " + newUser.getEmail() + " was added");
-                    users.put(newUser.getUid(), newUser);
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 12.0f));
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                    Tracking newUser = dataSnapshot.getValue(Tracking.class);
-                    if (users.containsKey(s)) {
-                        users.get(newUser.getUid()).getM().remove();
-                        users.remove(newUser.getUid());
-                    }
-
-                    newUser.setM(mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(newUser.getLat()), Double.parseDouble(newUser.getLng())))
-                            .title(newUser.getEmail())
-                            .snippet(newUser.getEmail())));
-                    users.put(newUser.getUid(), newUser);
-                    Log.d("ITO", "@@@@@@@@@@@" + newUser.getEmail() + " changed position!");
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    Tracking removedUser = dataSnapshot.getValue(Tracking.class);
-
-                    if(users.get(removedUser.getUid()) != null) {
-                        users.get(removedUser.getUid()).getM().remove();
-                        users.remove(removedUser.getUid());
-                        Log.d("ITO", "!!!!!!!!!!!" + removedUser.getEmail() + " was removed!");
-
-
-                    }
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-                */
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 
@@ -781,48 +759,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             });
 
-            //List<Tracking> track = new ArrayList<>();
-
-/*
-            ref.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    for (DataSnapshot noteSnapshot: dataSnapshot.getChildren()){
-                        Tracking note = noteSnapshot.getValue(Tracking.class);
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(Integer.parseInt(note.getLat()), Integer.parseInt(note.getLng()))).title(note.getEmail()));
-
-
-
-                        //update the location in firebase
-                        geofire.setLocation("You", new GeoLocation(latitude, longitude), new GeoFire.CompletionListener() {
-                            @Override
-                            public void onComplete(String key, DatabaseError error) {
-                                //add the marker
-                                if(myCurrLoc != null)
-                                    myCurrLoc.remove(); //removes the outdated marker
-                                myCurrLoc = mMap.addMarker(new MarkerOptions()
-                                        .position(new LatLng(latitude, longitude))
-                                        .title("You"));
-
-
-                                //move camera to this position
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 12.0f));
-                            }
-                        });
-
-                        Log.d("hey", String.format("Your location was changed %f/%f", latitude, longitude));
-                        //track.add(note);
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
-        */
         } else
             Log.d("hey", "Cannot get your location");
     }
@@ -866,6 +802,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
     }
 
+    private void stopGeoFencing() {
+        LocationServices.GeofencingApi.removeGeofences
+                (mGoogleApiClient, getGeofencePendingIntent())
+                .setResultCallback(new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        if (status.isSuccess())
+                            Log.d("woo", "Stop geofencing");
+                        else
+                            Log.d("woo", "Not stop geofencing");
+                    }
+                });
+    }
 
     /**
      * Manipulates the map once available.
@@ -906,40 +855,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .strokeWidth(5.0f)
         );
         (/
-
-
         //ADD GEOQUERY HERE
         //0.05f = 50 meters
-
-
         /*GeoQuery geoQuery = geofire.queryAtLocation(new GeoLocation(notifArea.latitude, notifArea.longitude), 0.5f);
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
                 sendNotification("Tara", String.format("%s is close to the destination!", key));
-
             }
-
             @Override
             public void onKeyExited(String key) {
                 sendNotification("Tara", String.format("%s passed the destination ????", key));
             }
-
             @Override
             public void onKeyMoved(String key, GeoLocation location) {
                 Log.d("move",String.format("yas we moved to this location: [%f/%f]", location.latitude, location.longitude));
             }
-
             @Override
             public void onGeoQueryReady() {
-
             }
-
             @Override
             public void onGeoQueryError(DatabaseError error) {
                 Log.e("error", ""+error);
             }
-
         });*/
 
 

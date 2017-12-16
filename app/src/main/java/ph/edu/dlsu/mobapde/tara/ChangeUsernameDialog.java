@@ -43,7 +43,6 @@ public class ChangeUsernameDialog extends DialogFragment {
 
                         EditText etUsername = (EditText) v.findViewById(R.id.et_changeusername);
 
-                        ((SettingsActivity) getActivity()).changeUsername(etUsername.getText().toString());
                     }
                 });
 

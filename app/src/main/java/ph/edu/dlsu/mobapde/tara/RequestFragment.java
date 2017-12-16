@@ -100,7 +100,7 @@ public class RequestFragment extends Fragment {
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-            transaction.replace(R.id.main_content, new NoRequestFragment());
+            transaction.replace(R.id.container_request, new NoRequestFragment());
             transaction.addToBackStack(null);
             transaction.commit();
 

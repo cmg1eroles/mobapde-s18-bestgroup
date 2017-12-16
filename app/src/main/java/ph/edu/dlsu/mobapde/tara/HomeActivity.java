@@ -167,32 +167,10 @@ public class HomeActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {}
-            });
+                public void onCancelled(DatabaseError databaseError) {
 
-            /*currRaceDatabaseRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for (int i = 0 ; i < adapter.getCount() ; i++)
-                        adapter.destroyItem(mViewPager, i, adapter.getItem(i));
-
-                    if(dataSnapshot.hasChild("currentRace")) {
-                        adapter.mFragmentList.set(0, new CurrentFragment());
-                    } else {
-                        adapter.mFragmentList.set(0, new NoCurrentFragment());
-                    }
-
-                    if(dataSnapshot.hasChild("requests")) {
-                        adapter.mFragmentList.set(1, new RequestFragment());
-                    } else {
-                        adapter.mFragmentList.set(1, new NoRequestFragment());
-                    }
-
-                    adapter.notifyDataSetChanged();
                 }
-                @Override
-                public void onCancelled(DatabaseError databaseError) {}
-            });*/
+            });
         }
 
         viewPager.setAdapter(adapter);

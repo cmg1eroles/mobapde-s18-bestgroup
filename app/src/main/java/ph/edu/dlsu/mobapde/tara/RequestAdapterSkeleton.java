@@ -55,8 +55,11 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
     String currRequestID = "";
     String currSender = "";
 
-    public void setUserRequests(ArrayList<Request> requests) {
+    RequestFragment rf;
+
+    public void setUserRequests(ArrayList<Request> requests, RequestFragment rf) {
         this.requests = requests;
+        this.rf = rf;
         notifyDataSetChanged();
     }
 
@@ -141,6 +144,7 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
                                     requests.remove(ind);
 
                                     notifyDataSetChanged();
+                                    rf.refreshRequest();
                                 }
                             }
 
@@ -206,6 +210,7 @@ public class RequestAdapterSkeleton extends RecyclerView.Adapter<RequestAdapterS
                             dbref.child("races").child(dataSnapshot.child("race_id").getValue(String.class)).child("participants").child(currUser.getUid()).getRef().removeValue();
 
                             notifyDataSetChanged();
+                            rf.refreshRequest();
                         }
 
                         @Override

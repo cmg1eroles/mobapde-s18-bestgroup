@@ -35,6 +35,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -66,6 +67,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
     long numOnTime, numEarly, numLate;
     long points, newPoints;
     private static final String TAG = "GeofenceTransitionsIS";
+    FirebaseUser currUser = FirebaseAuth.getInstance().getCurrentUser();
 
     /**
      * This constructor is required, and calls the super IntentService(String)
@@ -263,7 +265,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                         Date dateDead = dataSnapshot.child("date").getValue(Date.class);
 
                         timestamp = (long) dataSnapshot.child("taras")
-                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).getValue();
+                                .child(currUser.getUid()).getValue();
 
                         String timeZone = Calendar.getInstance().getTimeZone().getID();
                         Date local = new Date(timestamp + TimeZone.getTimeZone(timeZone).getOffset(-480));
@@ -324,6 +326,10 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
                         FirebaseDatabase.getInstance().getReference("races").child(deadlineID).child("participants")
                                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).removeValue();
+
+                        FirebaseDatabase.getInstance().getReference("users")
+                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .child("currentRace").removeValue();
 
                         sendNotification(message);
                     }

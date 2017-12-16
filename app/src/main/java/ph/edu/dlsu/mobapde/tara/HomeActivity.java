@@ -14,11 +14,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,6 +28,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
@@ -137,65 +140,115 @@ public class HomeActivity extends AppCompatActivity {
         );
     }
 
-    private void setupViewPager(ViewPager viewPager) {
+    private void setupViewPager(final ViewPager viewPager) {
         adapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         if(FirebaseAuth.getInstance().getCurrentUser() != null) {
             final String currUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
             final DatabaseReference currRaceDatabaseRef = FirebaseDatabase.getInstance().getReference().child("users").child(currUserID);
 
-            currRaceDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            /*cf = new CurrentFragment();
+            ncf = new NoCurrentFragment();
+            rf = new RequestFragment();
+            nrf = new NoRequestFragment();*/
+            /*adapter.addFragment(new NoCurrentFragment(), "CURRENT");
+            adapter.addFragment(new NoRequestFragment(), "REQUESTS");*/
+
+            viewPager.setAdapter(adapter);
+
+            currRaceDatabaseRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+                    adapter.mFragmentList.clear();
+                    adapter.mFragmentTitleList.clear();
+                    adapter.notifyDataSetChanged();
+
                     if(dataSnapshot.hasChild("currentRace")) {
-                        cf = new CurrentFragment();
-                        adapter.addFragment(cf, "CURRENT");
+                        Log.i("currentRace", "yes");
+                        adapter.addFragment(new CurrentFragment(), "CURRENT");
                     } else {
-                        ncf = new NoCurrentFragment();
-                        adapter.addFragment(ncf, "CURRENT");
+                        Log.i("currentRace", "no");
+                        adapter.addFragment(new NoCurrentFragment(), "CURRENT");
                     }
 
                     if(dataSnapshot.hasChild("requests")) {
-                        rf = new RequestFragment();
-                        adapter.addFragment(rf, "REQUESTS");
+                        Log.i("requests", "yes");
+                        adapter.addFragment(new RequestFragment(), "REQUESTS");
                     } else {
-                        nrf = new NoRequestFragment();
-                        adapter.addFragment(nrf, "REQUESTS");
+                        Log.i("requests", "no");
+                        adapter.addFragment(new NoRequestFragment(), "REQUESTS");
                     }
 
                     adapter.notifyDataSetChanged();
+                    viewPager.setAdapter(adapter);
+                    //refreshHome();
                 }
-
                 @Override
                 public void onCancelled(DatabaseError databaseError) {}
             });
 
-            /*currRaceDatabaseRef.addValueEventListener(new ValueEventListener() {
+            /*currRaceDatabaseRef.addChildEventListener(new ChildEventListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for (int i = 0 ; i < adapter.getCount() ; i++)
-                        adapter.destroyItem(mViewPager, i, adapter.getItem(i));
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-                    if(dataSnapshot.hasChild("currentRace")) {
-                        adapter.mFragmentList.set(0, new CurrentFragment());
-                    } else {
-                        adapter.mFragmentList.set(0, new NoCurrentFragment());
+                    if (dataSnapshot.getKey().equalsIgnoreCase("currentRace")) {
+                        Log.i(dataSnapshot.getKey(), "added");
+                        Fragment f = adapter.getItem(1);
+                        adapter.mFragmentList.clear();
+                        adapter.mFragmentTitleList.clear();
+
+                        adapter.addFragment(new CurrentFragment(), "CURRENT");
+                        adapter.addFragment(f, "REQUESTS");
+
+                        adapter.notifyDataSetChanged();
+                        refreshHome();
+
+                    } else if (dataSnapshot.getKey().equalsIgnoreCase("requests")) {
+                        Fragment f = adapter.getItem(0);
+                        adapter.mFragmentList.clear();
+                        adapter.mFragmentTitleList.clear();
+
+                        adapter.addFragment(f, "CURRENT");
+                        adapter.addFragment(new RequestFragment(), "REQUESTS");
+
+                        adapter.notifyDataSetChanged();
+                        refreshHome();
                     }
-
-                    if(dataSnapshot.hasChild("requests")) {
-                        adapter.mFragmentList.set(1, new RequestFragment());
-                    } else {
-                        adapter.mFragmentList.set(1, new NoRequestFragment());
-                    }
-
-                    adapter.notifyDataSetChanged();
                 }
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    Log.i(dataSnapshot.getKey(), "removed");
+                    if (dataSnapshot.getKey().equalsIgnoreCase("currentRace")) {
+                        Fragment f = adapter.getItem(1);
+                        adapter.mFragmentList.clear();
+                        adapter.mFragmentTitleList.clear();
+
+                        adapter.addFragment(new NoCurrentFragment(), "CURRENT");
+                        adapter.addFragment(f, "REQUESTS");
+
+                        adapter.notifyDataSetChanged();
+                        refreshHome();
+
+                    } else if (dataSnapshot.getKey().equalsIgnoreCase("requests")) {
+                        Fragment f = adapter.getItem(0);
+                        adapter.mFragmentList.clear();
+                        adapter.mFragmentTitleList.clear();
+
+                        adapter.addFragment(f, "CURRENT");
+                        adapter.addFragment(new NoRequestFragment(), "REQUESTS");
+
+                        adapter.notifyDataSetChanged();
+                        refreshHome();
+                    }
+                }
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
                 @Override
                 public void onCancelled(DatabaseError databaseError) {}
             });*/
         }
-
-        viewPager.setAdapter(adapter);
     }
 
     public void refreshHome() {
@@ -228,11 +281,17 @@ public class HomeActivity extends AppCompatActivity {
             return mFragmentTitleList.get(position);
         }
 
+        /*public void setItem(int position, Fragment f) {
+            mFragmentList.set(position, f);
+        }*/
+
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             return mFragmentList.get(position);
+
         }
+
 
         @Override
         public int getCount() {

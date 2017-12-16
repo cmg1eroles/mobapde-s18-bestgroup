@@ -75,7 +75,7 @@ public class RequestFragment extends Fragment {
                                     ra.addRequestHashMap(snapshot.getKey(), requests.size());
 
                                     requests.add(request);
-                                    ra.setUserRequests(requests);
+                                    ra.setUserRequests(requests, RequestFragment.this);
                                 }
                             }
                             @Override

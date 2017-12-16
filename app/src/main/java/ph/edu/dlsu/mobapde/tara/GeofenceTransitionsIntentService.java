@@ -17,6 +17,7 @@
 package ph.edu.dlsu.mobapde.tara;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -32,6 +33,7 @@ import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -104,16 +106,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
-            // Get the transition details as a String.
-            //String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
-            //        triggeringGeofences);
 
             getTransitionString(geofenceTransition, triggeringGeofences);
-            // Send notification and log the transition details.
 
-            Log.d("ito", "sending notif");
-            //sendNotification(message);
-            Log.d("ito", message + "");
         } else {
             // Log the error.
             Log.d("ito", getString(R.string.geofence_transition_invalid_type, geofenceTransition));
@@ -185,7 +180,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
                         .setColor(Color.RED)
                         .setContentTitle(notificationDetails)
                         .setContentText("You received " + newPoints + " points")
-                        .setContentIntent(notificationPendingIntent);
+                        .setContentIntent(notificationPendingIntent)
+                        .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND);
 
             }else if (status.equals("Arrived LATE")){
                 // Define the notification settings.
@@ -197,7 +193,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
                         .setColor(Color.RED)
                         .setContentTitle(notificationDetails)
                         .setContentText("You lost " + newPoints + " points")
-                        .setContentIntent(notificationPendingIntent);
+                        .setContentIntent(notificationPendingIntent)
+                        .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND);
 
             }else{
                 // Define the notification settings.
@@ -209,7 +206,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
                         .setColor(Color.RED)
                         .setContentTitle(notificationDetails)
                         .setContentText("Press to open the app.")
-                        .setContentIntent(notificationPendingIntent);
+                        .setContentIntent(notificationPendingIntent)
+                        .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND);
 
             }
 
@@ -229,12 +227,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
 
     }
-
-    /*
-    public int getPoints(){
-        return (deadline - timestamp)/(timestamp + deadline) *
-    }
-    */
 
     /**
      * Maps geofence transition types to their human-readable equivalents.
@@ -288,6 +280,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                                     userRef.child("points").setValue(points);
                                     status =  "Arrived ON TIME";
                                     Log.d("woo", "INSIDE SWITCH " + status);
+
                                     break;
                                 }else if (local.compareTo(dateDead)<0){
                                     numEarly++;
@@ -327,6 +320,10 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
                         message = status + ":" + TextUtils.join(", ",  triggeringGeofencesIdsList);
                         Log.d("woo", "The message is: " + message);
+
+                        FirebaseDatabase.getInstance().getReference("races").child(deadlineID).child("participants")
+                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).removeValue();
+
                         sendNotification(message);
                     }
 

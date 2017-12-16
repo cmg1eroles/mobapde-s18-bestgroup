@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -106,6 +107,31 @@ public class CurrentFragment extends Fragment {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         dataSnapshot.getRef().removeValue();
+                        Toast.makeText(getContext(), "You lost 50 points for leaving", Toast.LENGTH_LONG).show();
+                        ref.child("users").child(currUser.getUid()).child("numCancelled").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                long num = (long) dataSnapshot.getValue();
+                                ref.child("users").child(currUser.getUid()).child("numCancelled").setValue(num+1);
+                                ref.child("users").child(currUser.getUid()).child("points").addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        long points = (long) dataSnapshot.getValue();
+                                        ref.child("users").child(currUser.getUid()).child("points").setValue(points - 50);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
                         ((HomeActivity) getActivity()).refreshHome();
                     }
 

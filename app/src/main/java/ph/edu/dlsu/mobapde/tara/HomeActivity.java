@@ -186,68 +186,6 @@ public class HomeActivity extends AppCompatActivity {
                 @Override
                 public void onCancelled(DatabaseError databaseError) {}
             });
-
-            /*currRaceDatabaseRef.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-                    if (dataSnapshot.getKey().equalsIgnoreCase("currentRace")) {
-                        Log.i(dataSnapshot.getKey(), "added");
-                        Fragment f = adapter.getItem(1);
-                        adapter.mFragmentList.clear();
-                        adapter.mFragmentTitleList.clear();
-
-                        adapter.addFragment(new CurrentFragment(), "CURRENT");
-                        adapter.addFragment(f, "REQUESTS");
-
-                        adapter.notifyDataSetChanged();
-                        refreshHome();
-
-                    } else if (dataSnapshot.getKey().equalsIgnoreCase("requests")) {
-                        Fragment f = adapter.getItem(0);
-                        adapter.mFragmentList.clear();
-                        adapter.mFragmentTitleList.clear();
-
-                        adapter.addFragment(f, "CURRENT");
-                        adapter.addFragment(new RequestFragment(), "REQUESTS");
-
-                        adapter.notifyDataSetChanged();
-                        refreshHome();
-                    }
-                }
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    Log.i(dataSnapshot.getKey(), "removed");
-                    if (dataSnapshot.getKey().equalsIgnoreCase("currentRace")) {
-                        Fragment f = adapter.getItem(1);
-                        adapter.mFragmentList.clear();
-                        adapter.mFragmentTitleList.clear();
-
-                        adapter.addFragment(new NoCurrentFragment(), "CURRENT");
-                        adapter.addFragment(f, "REQUESTS");
-
-                        adapter.notifyDataSetChanged();
-                        refreshHome();
-
-                    } else if (dataSnapshot.getKey().equalsIgnoreCase("requests")) {
-                        Fragment f = adapter.getItem(0);
-                        adapter.mFragmentList.clear();
-                        adapter.mFragmentTitleList.clear();
-
-                        adapter.addFragment(f, "CURRENT");
-                        adapter.addFragment(new NoRequestFragment(), "REQUESTS");
-
-                        adapter.notifyDataSetChanged();
-                        refreshHome();
-                    }
-                }
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
-                @Override
-                public void onCancelled(DatabaseError databaseError) {}
-            });*/
         }
     }
 

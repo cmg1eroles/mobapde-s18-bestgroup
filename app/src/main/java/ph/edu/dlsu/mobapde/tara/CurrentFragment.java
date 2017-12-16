@@ -154,7 +154,7 @@ public class CurrentFragment extends Fragment {
                             String title = dataSnapshot.child("title").getValue(String.class);
                             Date date = dataSnapshot.child("date").getValue(Date.class);
                             String year = Integer.toString(date.getYear() + 1900);
-                            String month = Integer.toString(date.getMonth());
+                            String month = Integer.toString(date.getMonth()+1);
                             String day = Integer.toString(date.getDate());
                             int m = date.getMinutes();
                             String hrs = Integer.toString(date.getHours());

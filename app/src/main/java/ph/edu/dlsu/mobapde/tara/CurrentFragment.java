@@ -84,7 +84,7 @@ public class CurrentFragment extends Fragment {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         String currRace = (String) dataSnapshot.getValue();
 
-                        ref.child("races").child("taras").child(currUser.getUid()).setValue(System.currentTimeMillis());
+                        ref.child("races").child(currRace).child("taras").child(currUser.getUid()).setValue(System.currentTimeMillis());
 
                         Intent i = new Intent(getContext(), MapsActivity.class);
                         startActivity(i);

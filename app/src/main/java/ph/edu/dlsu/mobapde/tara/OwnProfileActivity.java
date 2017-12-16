@@ -72,7 +72,7 @@ public class OwnProfileActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User u = dataSnapshot.getValue(User.class);
-                tvInitial.setText(u.getEmail().charAt(0) + "");
+                tvInitial.setText((u.getEmail().charAt(0) + "").toUpperCase());
                 tvUsername.setText(u.getEmail() + "");
                 tvPoints.setText(u.getPoints() + "");
                 tvNumEarly.setText(u.getNumEarly() + "");

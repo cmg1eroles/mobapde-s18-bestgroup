@@ -75,6 +75,24 @@ public class CurrentFragment extends Fragment {
         buttonTara.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                currUser = FirebaseAuth.getInstance().getCurrentUser();
+                ref = FirebaseDatabase.getInstance().getReference();
+
+                ref.child("users").child(currUser.getUid()).child("currentRace").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String currRace = (String) dataSnapshot.getValue();
+
+                        ref.child("races").child("taras").child(currUser.getUid()).setValue(System.currentTimeMillis());
+
+                        Intent i = new Intent(getContext(), MapsActivity.class);
+                        startActivity(i);
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
         });
 

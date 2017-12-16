@@ -249,7 +249,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 deadlineID = (String) dataSnapshot.child("currentRace").getValue();
-                racesRef = FirebaseDatabase.getInstance().getReference("races").child(deadlineID).child("date");
+                racesRef = FirebaseDatabase.getInstance().getReference("races").child(deadlineID);
                 numEarly = (long) dataSnapshot.child("numEarly").getValue();
                 numLate = (long) dataSnapshot.child("numLate").getValue();
                 numOnTime = (long) dataSnapshot.child("numOnTime").getValue();
@@ -259,18 +259,19 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 racesRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        deadline = (long) dataSnapshot.child("time").getValue();
-                        Date dateDead = dataSnapshot.getValue(Date.class);
+                        deadline = (long) dataSnapshot.child("date").child("time").getValue();
+                        Date dateDead = dataSnapshot.child("date").getValue(Date.class);
+
+                        timestamp = (long) dataSnapshot.child("taras")
+                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).getValue();
+
+                        String timeZone = Calendar.getInstance().getTimeZone().getID();
+                        Date local = new Date(timestamp + TimeZone.getTimeZone(timeZone).getOffset(-480));
+
 
                         Log.d("woo", "dateDead is: " + dateDead);
                         switch (transitionType) {
                             case Geofence.GEOFENCE_TRANSITION_ENTER:
-
-
-                                timestamp = System.currentTimeMillis();
-                                String timeZone = Calendar.getInstance().getTimeZone().getID();
-                                Date local = new Date(timestamp + TimeZone.getTimeZone(timeZone).getOffset(timestamp));
-
 
                                 Log.d("woo", "local is: " + local);
                                 if (local.compareTo(dateDead)==0){
